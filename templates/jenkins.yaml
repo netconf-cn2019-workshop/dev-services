@@ -4,6 +4,7 @@ metadata:
     name: jenkins
 
 ---
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 groupNames: null
@@ -11,7 +12,7 @@ metadata:
   name: jenkins_edit
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role # ClusterRole/cluster-admin
+  kind: ClusterRole
   name: edit
 subjects:
   - kind: ServiceAccount
@@ -142,7 +143,8 @@ spec:
               path: /login
               port: 8080
             initialDelaySeconds: 60
-            timeoutSeconds: 240
+            periodSeconds: 3
+            timeoutSeconds: 15
           resources:
             limits:
               memory: 1024Mi
@@ -217,7 +219,7 @@ data:
       <numExecutors>5</numExecutors>
       <mode>NORMAL</mode>
       <useSecurity>true</useSecurity>
-      <authorizationStrategy class="hudson.security.AuthorizationStrategy$Unsecured"/>
+      <authorizationStrategy class="hudson.security.LegacyAuthorizationStrategy"/>
       <securityRealm class="hudson.security.LegacySecurityRealm"/>
       <disableRememberMe>false</disableRememberMe>
       <projectNamingStrategy class="jenkins.model.ProjectNamingStrategy$DefaultProjectNamingStrategy"/>
@@ -233,21 +235,25 @@ data:
           <templates>
             <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
               <inheritFrom></inheritFrom>
-              <name>.NET Core Agent</name>
+              <name>dotnet agent</name>
               <instanceCap>2147483647</instanceCap>
               <idleMinutes>10</idleMinutes>
               <label>dotnet</label>
-              <serviceAccount>jenkins</serviceAccount>
+              <serviceAccount>default</serviceAccount>
               <nodeSelector></nodeSelector>
               <nodeUsageMode>NORMAL</nodeUsageMode>
+              <customWorkspaceVolumeEnabled>true</customWorkspaceVolumeEnabled>
+              <workspaceVolume class="org.csanchez.jenkins.plugins.kubernetes.volumes.workspace.EmptyDirWorkspaceVolume">
+                <memory>false</memory>
+              </workspaceVolume>
               <volumes></volumes>
               <containers>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
-                  <name>dotnet-builder</name>
+                  <name>jnlp</name>
                   <image>registry.access.redhat.com/dotnet/dotnet-22-jenkins-slave-rhel7:2.2</image>
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
-                  <workingDir>/home/jenkins</workingDir>
+                  <workingDir>/home/jenkins/agent</workingDir>
                   <command></command>
                   <args>${computer.jnlpmac} ${computer.name}</args>
                   <ttyEnabled>false</ttyEnabled>
@@ -261,17 +267,19 @@ data:
                   <envVars>
                     <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                       <key>JENKINS_URL</key>
-                      <value>http://jenkins.$$cicd_namespace.svc.cluster.local:8080</value>
+                      <value>http://jenkins</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>JENKINS_TUNNEL</key>
+                      <value>jenkins-jnlp:50000</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>TZ</key>
+                      <value>Asia/Shanghai</value>
                     </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                   </envVars>
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
               </containers>
-              <envVars>
-                <org.csanchez.jenkins.plugins.kubernetes.PodEnvVar>
-                  <key>TZ</key>
-                  <value>Asia/Shanghai</value>
-                </org.csanchez.jenkins.plugins.kubernetes.PodEnvVar>
-              </envVars>
               <annotations/>
               <imagePullSecrets/>
               <nodeProperties/>
@@ -281,7 +289,7 @@ data:
           <serverUrl>https://kubernetes.default</serverUrl>
           <skipTlsVerify>false</skipTlsVerify>
           <namespace>$$cicd_namespace</namespace>
-          <jenkinsUrl>http://jenkins.$$cicd_namespace.svc.cluster.local:8080</jenkinsUrl>
+          <jenkinsUrl>http://jenkins</jenkinsUrl>
           <jenkinsTunnel>jenkins-jnlp:50000</jenkinsTunnel>
           <containerCap>10</containerCap>
           <retentionTimeout>5</retentionTimeout>
@@ -303,9 +311,6 @@ data:
       </views>
       <primaryView>All</primaryView>
       <slaveAgentPort>50000</slaveAgentPort>
-      <disabledAgentProtocols>
-        <string>JNLP-connect JNLP2-connect</string>
-      </disabledAgentProtocols>
       <label></label>
       <crumbIssuer class="hudson.security.csrf.DefaultCrumbIssuer">
         <excludeClientIPFromCrumb>true</excludeClientIPFromCrumb>
@@ -331,7 +336,7 @@ data:
   jenkins.model.JenkinsLocationConfiguration.xml: |-
     <?xml version='1.1' encoding='UTF-8'?>
     <jenkins.model.JenkinsLocationConfiguration>
-      <adminAddress></adminAddress>
+      <adminAddress>admin@cluster.local</adminAddress>
       <jenkinsUrl>http://jenkins.$$dns_suffix</jenkinsUrl>
     </jenkins.model.JenkinsLocationConfiguration>
 
