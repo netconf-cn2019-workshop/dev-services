@@ -208,6 +208,31 @@ data:
       </builders>
       <publishers/>
       <buildWrappers/>
+    </project>
+
+  dotnetclub: |-
+      <?xml version='1.1' encoding='UTF-8'?>
+      <flow-definition plugin="workflow-job@2.35">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties/>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.74">
+          <script>
+      node(&quot;dotnet&quot;) {
+        stage(&apos;Fetch Code&apos;) {
+            git branch: &apos;master&apos;, url: &apos;https://github.com/dotnetclub-net/dotnetclub.git&apos;
+        }
+        stage(&apos;Build App&apos;) {
+          sh &quot;dotnet build&quot;
+        }
+      }</script>
+          <sandbox>true</sandbox>
+        </definition>
+        <triggers/>
+        <authToken>AMRAAIPvxjPpotgUZsyG</authToken>
+        <disabled>false</disabled>
+      </flow-definition>
 
 ---
 
@@ -346,13 +371,10 @@ data:
     </jenkins.model.JenkinsLocationConfiguration>
 
   plugins.txt:
-    build-timeout
-    rebuild
     git
     dashboard-view
     pipeline-stage-view
-    build-pipeline-plugin
-    parameterized-trigger
+    workflow-aggregator
     kubernetes:1.20.0
 
   apply_config.sh: |-
