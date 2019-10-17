@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+    name: jenkins
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+groupNames: null
+metadata:
+  name: jenkins_edit
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role # ClusterRole/cluster-admin
+  name: edit
+subjects:
+  - kind: ServiceAccount
+    name: jenkins
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: jenkins-jnlp
+spec:
+    type: ClusterIP
+    ports:
+      - name: agent
+        nodePort: 0
+        port: 50000
+        protocol: TCP
+        targetPort: 50000
+    selector:
+      name: jenkins
+    sessionAffinity: None
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+    name: jenkins
+spec:
+    type: ClusterIP
+    ports:
+      - name: web
+        nodePort: 0
+        port: 80
+        protocol: TCP
+        targetPort: 8080
+    selector:
+      name: jenkins
+    sessionAffinity: None
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+  generation: 1
+  name: jenkins-ingress
+spec:
+  rules:
+  - host: jenkins.192.168.1.51.xip.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: jenkins
+          servicePort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+spec:
+  replicas: 1
+  strategy: 
+    type: Recreate
+  selector:
+    matchLabels:
+      name: jenkins
+  template:
+    metadata:
+      labels:
+        name: jenkins
+    spec:
+      containers:
+        - name: jenkins
+          image: dockerhub.azk8s.cn/jenkins/jenkins:lts
+          env:            
+            - name: KUBERNETES_MASTER
+              value: https://kubernetes.default:443
+            - name: KUBERNETES_TRUST_CERTIFICATES
+              value: 'true'
+            - name: JENKINS_SERVICE_NAME
+              value: jenkins
+            - name: JNLP_SERVICE_NAME
+              value: jenkins-jnlp
+          ports:
+            - name: http-port
+              containerPort: 8080
+            - name: jnlp-port
+              containerPort: 50000
+          livenessProbe:
+            failureThreshold: 2
+            httpGet: 
+              path: /login
+              port: 8080        
+            initialDelaySeconds: 420
+            periodSeconds: 360
+            timeoutSeconds: 240
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 3
+            timeoutSeconds: 240
+          resources:
+            limits:
+              memory: 1024Mi
+          volumeMounts: 
+            - mountPath: /var/lib/jenkins
+              name: jenkins-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccountName: jenkins
+      volumes:
+        - name: jenkins-data
+          emptyDir:
+            medium: 
+
+
