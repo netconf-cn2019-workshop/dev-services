@@ -187,22 +187,27 @@ kind: ConfigMap
 metadata:
   name: jenkins-jobs
 data:
-  dotnetclub-build: |-
-    <?xml version='1.0' encoding='UTF-8'?>
+  dotnet-build: |-
+    <?xml version='1.1' encoding='UTF-8'?>
     <project>
+      <actions/>
+      <description></description>
       <keepDependencies>false</keepDependencies>
-      <properties/>
       <scm class="hudson.scm.NullSCM"/>
+      <assignedNode>dotnet</assignedNode>
       <canRoam>false</canRoam>
       <disabled>false</disabled>
       <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
       <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
       <triggers/>
       <concurrentBuild>false</concurrentBuild>
-      <builders/>
+      <builders>
+        <hudson.tasks.Shell>
+          <command>echo &quot;Hello world from .NET Core SDK $(dotnet --version)&quot;</command>
+        </hudson.tasks.Shell>
+      </builders>
       <publishers/>
       <buildWrappers/>
-    </project>
 
 ---
 
