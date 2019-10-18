@@ -1,0 +1,239 @@
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: gogs-postgresql
+  labels:
+    app: gogs
+  annotations:
+    description: Exposes the database server
+spec:
+  ports:
+  - name: postgresql
+    port: 5432
+    targetPort: 5432
+  selector:
+    name: gogs-postgresql
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gogs-postgresql
+  labels:
+    app: gogs
+  annotations:
+    description: Defines how to deploy the database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: gogs-postgresql
+      app: gogs
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: gogs
+        name: gogs-postgresql
+    spec:
+      containers:
+      - env:
+        - name: POSTGRESQL_USER
+          value: gogs
+        - name: POSTGRESQL_PASSWORD
+          value: gogs
+        - name: POSTGRESQL_DATABASE
+          value: gogs-data
+        - name: POSTGRESQL_MAX_CONNECTIONS
+          value: '100'
+        - name: POSTGRESQL_SHARED_BUFFERS
+          value: '12MB'
+        - name: POSTGRESQL_ADMIN_PASSWORD
+          value: gogs
+        image: 'dockerhub.azk8s.cn/centos/postgresql-96-centos7:latest'
+        livenessProbe:
+          initialDelaySeconds: 30
+          tcpSocket:
+            port: 5432
+          timeoutSeconds: 1
+        name: postgresql
+        ports:
+        - containerPort: 5432
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -i
+            - -c
+            - psql -h 127.0.0.1 -U ${POSTGRESQL_USER} -q -d ${POSTGRESQL_DATABASE} -c 'SELECT 1'
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 512Mi
+        volumeMounts:
+        - mountPath: /var/lib/pgsql/data
+          name: gogs-postgres-data
+      volumes:
+      - name: gogs-postgres-data
+        emptyDir: {}
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gogs
+  annotations:
+    description: The Gogs server's http port
+    service.alpha.openshift.io/dependencies: '[{"name":"gogs-postgresql","namespace":"","kind":"Service"}]'
+  labels:
+    app: gogs
+spec:
+  ports:
+  - name: 3000-tcp
+    port: 3000
+    protocol: TCP
+    targetPort: 3000
+  - name: 10022-tcp
+    port: 10022
+    protocol: TCP
+    targetPort: 10022
+  selector:
+    app: gogs
+    deploymentconfig: gogs
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: gogs-ingress
+  labels:
+    app: gogs
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+  generation: 1
+spec:
+  rules:
+  - host: gogs-$$user.$$dns_suffix
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: gogs
+          servicePort: 3000
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: gogs
+  labels:
+    app: gogs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gogs
+      deploymentconfig: gogs
+  template:
+    metadata:
+      labels:
+        app: gogs
+        deploymentconfig: gogs
+    spec:
+      containers:
+      - image: 'dockerhub.azk8s.cn/openshiftdemos/gogs:0.11.34'
+        imagePullPolicy: Always
+        name: gogs
+        ports:
+          - containerPort: 3000
+            protocol: TCP
+          - containerPort: 10022
+            protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+          - name: gogs-data
+            mountPath: /opt/gogs/data
+          - name: gogs-config
+            mountPath: /etc/gogs/conf
+        readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 3
+            timeoutSeconds: 1
+            periodSeconds: 20
+            successThreshold: 1
+            failureThreshold: 3
+        livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+              scheme: HTTP
+            initialDelaySeconds: 3
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: gogs-data
+          emptyDir: {}
+        - name: gogs-config
+          configMap:
+            name: gogs-config
+            items:
+              - key: app.ini
+                path: app.ini
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gogs-config
+  labels:
+    app: gogs
+data:
+  app.ini: |
+    RUN_MODE = prod
+    RUN_USER = gogs
+
+    [database]
+    DB_TYPE  = postgres
+    HOST     = gogs-postgresql:5432
+    NAME     = gogs-data
+    USER     = gogs
+    PASSWD   = gogs
+
+    [repository]
+    ROOT = /opt/gogs/data/repositories
+
+    [server]
+    ROOT_URL=http://gogs-$$user.$$dns_suffix
+    SSH_DOMAIN=securegogs-$$user.$$dns_suffix
+    START_SSH_SERVER=true
+    SSH_LISTEN_PORT=10022
+
+    [security]
+    INSTALL_LOCK = true
+
+    [service]
+    ENABLE_CAPTCHA = false
+
+    [webhook]
+    SKIP_TLS_VERIFY = true
+
+
+
