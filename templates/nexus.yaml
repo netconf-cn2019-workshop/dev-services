@@ -1,0 +1,108 @@
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+  labels:
+    app: nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexus
+      deploymentconfig: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+        deploymentconfig: nexus
+    spec:
+      containers:
+      - name: nexus
+        env:
+          - name: CONTEXT_PATH
+            value: /
+        image: 'dockerhub.azk8s.cn/sonatype/nexus3:3.13.0'
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+              - echo
+              - ok
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        ports:
+          - containerPort: 8081
+            protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8081
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 1
+            memory: 2Gi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /nexus-data
+          name: nexus-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: nexus-data
+        emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nexus
+  name: nexus
+spec:
+  ports:
+  - name: 8081-tcp
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+  selector:
+    deploymentconfig: nexus
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: nexus-ingress
+  labels:
+    app: nexus
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+  generation: 1
+spec:
+  rules:
+  - host: nexus-$$user.$$dns_suffix
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nexus
+          servicePort: 8081

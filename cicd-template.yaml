@@ -90,9 +90,22 @@ spec:
               oc set probe dc/tasks --liveness  --get-url=http://:8080/ws/demo/healthcheck --initial-delay-seconds=180 --failure-threshold=10 --period-seconds=10 -n ${STAGE_PROJECT}
               oc rollout cancel dc/tasks -n ${DEV_PROJECT}
 
-              oc new-app -f https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/nexus3-template.yaml --param=NEXUS_VERSION=3.13.0 --param=MAX_MEMORY=2Gi          
-              oc set resources dc/nexus --requests=cpu=200m,memory=1Gi --limits=cpu=2,memory=4Gi 
 
+
+
+
+
+
+
+
+
+
+
+
+
+              kubectl rollout status deployment/nexus
+              NEXUS_POD=$(k get pod -l app=nexus -o=jsonpath='{.items[0].metadata.name}')
+              kubectl exec ${NEXUS_POD} -- /bin/bash -c 'curl -o /tmp/nexus-functions -s https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/scripts/nexus-functions; source /tmp/nexus-functions; add_nexus3_redhat_repos admin admin123 http://localhost:8081'
 
 
 
@@ -100,7 +113,7 @@ spec:
               GOGS_USER=gogs
               GOGS_PWD=gogs
 
-              kubectl rollout status dc gogs
+              kubectl rollout status deployment/gogs
 
               _RETURN=$(curl -o /tmp/curl.log -sL --post302 -w "%{http_code}" http://$GOGS_SVC:3000/user/sign_up \
                 --form user_name=$GOGS_USER \
