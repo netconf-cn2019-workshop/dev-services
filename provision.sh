@@ -99,11 +99,14 @@ function deploy() {
   kcd cicd-$PRJ_SUFFIX
   # todo: replace vars
   ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | k apply -f -
-
   sleep 5
 
   ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | k apply -f -
+  sleep 5
   
+  ./templates/tmpl.sh ./templates/sonarqube.yaml ./templates/vars | k apply -f -
+  sleep 5
+
   echo "Provisioning installer"
   oc new-app -f ./cicd-template.yaml -p DEV_PROJECT=dev-$PRJ_SUFFIX -p STAGE_PROJECT=stage-$PRJ_SUFFIX  -n cicd-$PRJ_SUFFIX 
 }

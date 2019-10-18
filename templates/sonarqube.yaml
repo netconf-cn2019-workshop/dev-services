@@ -1,0 +1,245 @@
+---
+
+apiVersion: v1
+kind: Secret
+stringData:
+  database-name: sonarqube-data
+  database-password: sonarqube
+  database-user: sonarqube
+metadata:
+  name: sonardb
+  labels:
+    app: sonarqube
+type: Opaque
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: sonarqube
+  name: sonardb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: sonardb
+      app: sonarqube
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+        name: sonardb
+    spec:
+      containers:
+      - env:
+        - name: POSTGRESQL_USER
+          valueFrom:
+            secretKeyRef:
+              key: database-user
+              name: sonardb
+        - name: POSTGRESQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: sonardb
+        - name: POSTGRESQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              key: database-name
+              name: sonardb
+        image: 'dockerhub.azk8s.cn/centos/postgresql-96-centos7:latest'
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 5432
+          timeoutSeconds: 1
+        name: postgresql
+        ports:
+        - containerPort: 5432
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -i
+            - -c
+            - psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d $POSTGRESQL_DATABASE -c
+              'SELECT 1'
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 1Gi
+            cpu: 1
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+          - mountPath: /var/lib/pgsql/data
+            name: sonardb-data
+      volumes:
+        - name: sonardb-data
+          emptyDir: {}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  generation: 1
+  labels:
+    app: sonarqube
+  name: sonarqube
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarqube
+      deploymentconfig: sonarqube
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: sonarqube
+        deploymentconfig: sonarqube
+    spec:
+      containers:
+      - env:
+        - name: JDBC_URL
+          value: jdbc:postgresql://sonardb:5432/sonarqube-data
+        - name: JDBC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: database-user
+              name: sonardb
+        - name: JDBC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: database-password
+              name: sonardb
+        - name: FORCE_AUTHENTICATION
+          value: 'false'
+        - name: LDAP_REALM
+          value: ''
+        image: 'dockerhub.azk8s.cn/siamaksade/sonarqube:latest'
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: sonarqube
+        ports:
+        - containerPort: 9000
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 9000
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 200m
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 2Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /opt/sonarqube/data
+          name: sonar-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: sonar-data
+        emptyDir: {}
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name=="postgresql")].port}
+  labels:
+    app: sonarqube
+    template: postgresql-template
+  name: sonardb
+spec:
+  ports:
+  - name: postgresql
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    name: sonardb
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: sonarqube
+  name: sonarqube
+spec:
+  ports:
+  - name: 9000-tcp
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    deploymentconfig: sonarqube
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: sonarqube-ingress
+  labels:
+    app: sonarqube
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+  generation: 1
+spec:
+  rules:
+  - host: sonarqube-$$user.$$dns_suffix
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: sonarqube
+          servicePort: 9000
