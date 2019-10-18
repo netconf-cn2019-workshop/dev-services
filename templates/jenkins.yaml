@@ -1,7 +1,9 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-    name: jenkins
+  name: jenkins
+  labels:
+    app: jenkins
 
 ---
 
@@ -10,6 +12,8 @@ kind: RoleBinding
 groupNames: null
 metadata:
   name: jenkins_edit
+  labels:
+    app: jenkins
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -23,7 +27,9 @@ subjects:
 apiVersion: v1
 kind: Service
 metadata:
-    name: jenkins-jnlp
+  name: jenkins-jnlp
+  labels:
+    app: jenkins
 spec:
     type: ClusterIP
     ports:
@@ -41,7 +47,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-    name: jenkins
+  name: jenkins
+  labels:
+    app: jenkins
 spec:
     type: ClusterIP
     ports:
@@ -58,13 +66,15 @@ spec:
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
+  name: jenkins-ingress
+  labels:
+    app: jenkins
   annotations:
     ingress.kubernetes.io/rewrite-target: /
   generation: 1
-  name: jenkins-ingress
 spec:
   rules:
-  - host: jenkins.$$dns_suffix
+  - host: jenkins-$$user.$$dns_suffix
     http:
       paths:
       - path: /
@@ -77,6 +87,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jenkins
+  labels:
+    app: jenkins
 spec:
   replicas: 1
   strategy: 
@@ -186,6 +198,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: jenkins-jobs
+  labels:
+    app: jenkins
 data:
   dotnet-build: |-
     <?xml version='1.1' encoding='UTF-8'?>
@@ -240,6 +254,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: jenkins
+  labels:
+    app: jenkins
 data:
   config.xml: |-
     <?xml version='1.0' encoding='UTF-8'?>
@@ -367,7 +383,7 @@ data:
     <?xml version='1.1' encoding='UTF-8'?>
     <jenkins.model.JenkinsLocationConfiguration>
       <adminAddress>admin@cluster.local</adminAddress>
-      <jenkinsUrl>http://jenkins.$$dns_suffix</jenkinsUrl>
+      <jenkinsUrl>http://jenkins-$$user.$$dns_suffix</jenkinsUrl>
     </jenkins.model.JenkinsLocationConfiguration>
 
   plugins.txt:

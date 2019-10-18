@@ -86,10 +86,7 @@ done
 ################################################################################
 
 LOGGEDIN_USER=$(id -un)
-K_USER=${ARG_USERNAME:-$LOGGEDIN_USER}
-PRJ_SUFFIX=${ARG_PROJECT_SUFFIX:-`echo $K_USER | sed -e 's/[-@].*//g'`}
-GITHUB_ACCOUNT=${GITHUB_ACCOUNT:-jijiechen}
-GITHUB_REF=${GITHUB_REF:-master}
+PRJ_SUFFIX=${ARG_PROJECT_SUFFIX:-`echo $LOGGEDIN_USER | sed -e 's/[-@].*//g'`}
 
 function deploy() {
   kubectl create namespace dev-$PRJ_SUFFIX
@@ -98,17 +95,17 @@ function deploy() {
 
   sleep 2
 
-  # oc policy add-role-to-group edit system:serviceaccounts:cicd-$PRJ_SUFFIX -n dev-$PRJ_SUFFIX
-  # oc policy add-role-to-group edit system:serviceaccounts:cicd-$PRJ_SUFFIX -n stage-$PRJ_SUFFIX
+  echo 'Provisioning Jenkins...'
+  kcd cicd-$PRJ_SUFFIX
+  # todo: replace vars
+  ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | k apply -f -
 
-  oc new-app jenkins-ephemeral -n cicd-$PRJ_SUFFIX
+  sleep 5
 
-  sleep 2
-
-#   local template=https://raw.githubusercontent.com/$GITHUB_ACCOUNT/netconf-cicd/$GITHUB_REF/cicd-template.yaml
-  local template=./cicd-template.yaml
-  echo "Using template $template"
-  oc new-app -f $template -p DEV_PROJECT=dev-$PRJ_SUFFIX -p STAGE_PROJECT=stage-$PRJ_SUFFIX  -p EPHEMERAL=$ARG_EPHEMERAL -n cicd-$PRJ_SUFFIX 
+  ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | k apply -f -
+  
+  echo "Provisioning installer"
+  oc new-app -f ./cicd-template.yaml -p DEV_PROJECT=dev-$PRJ_SUFFIX -p STAGE_PROJECT=stage-$PRJ_SUFFIX  -n cicd-$PRJ_SUFFIX 
 }
 
 function kcd() {
