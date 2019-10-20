@@ -99,7 +99,7 @@ metadata:
   generation: 1
 spec:
   rules:
-  - host: nexus-$$user.$$dns_suffix
+  - host: nexus-$$deploy_suffix.$$dns_suffix
     http:
       paths:
       - path: /

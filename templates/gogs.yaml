@@ -124,7 +124,7 @@ metadata:
   generation: 1
 spec:
   rules:
-  - host: gogs-$$user.$$dns_suffix
+  - host: gogs-$$deploy_suffix.$$dns_suffix
     http:
       paths:
       - path: /
@@ -232,8 +232,8 @@ data:
     ROOT = /opt/gogs/data/repositories
 
     [server]
-    ROOT_URL=http://gogs-$$user.$$dns_suffix
-    SSH_DOMAIN=securegogs-$$user.$$dns_suffix
+    ROOT_URL=http://gogs-$$deploy_suffix.$$dns_suffix
+    SSH_DOMAIN=securegogs-$$deploy_suffix.$$dns_suffix
     START_SSH_SERVER=true
     SSH_LISTEN_PORT=10022
 

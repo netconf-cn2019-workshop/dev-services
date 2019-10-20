@@ -236,7 +236,7 @@ metadata:
   generation: 1
 spec:
   rules:
-  - host: sonarqube-$$user.$$dns_suffix
+  - host: sonarqube-$$deploy_suffix.$$dns_suffix
     http:
       paths:
       - path: /

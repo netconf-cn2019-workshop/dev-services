@@ -74,7 +74,7 @@ metadata:
   generation: 1
 spec:
   rules:
-  - host: jenkins-$$user.$$dns_suffix
+  - host: jenkins-$$deploy_suffix.$$dns_suffix
     http:
       paths:
       - path: /
@@ -124,7 +124,7 @@ data:
           <script>
       node(&quot;dotnet&quot;) {
         stage(&apos;Fetch Code&apos;) {
-            git branch: &apos;master&apos;, url: &apos;http:/gogs:3000/admin/$$gogs_repo_name.git&apos;
+            git branch: &apos;master&apos;, url: &apos;http://gogs:3000/gogs/$$gogs_repo_name.git&apos;
         }
         stage(&apos;Build App&apos;) {
           sh &quot;dotnet build&quot;
@@ -185,7 +185,7 @@ data:
               <containers>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                   <name>jnlp</name>
-                  <image>registry.access.redhat.com/dotnet/dotnet-22-jenkins-slave-rhel7:2.2</image>
+                  <image>dockerhub.azk8s.cn/jijiechen/dotnet-30-jenkins-slave-rhel7:3.0</image>
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
                   <workingDir>/home/jenkins/agent</workingDir>
@@ -223,7 +223,7 @@ data:
           </templates>
           <serverUrl>https://kubernetes.default</serverUrl>
           <skipTlsVerify>false</skipTlsVerify>
-          <namespace>$$cicd_namespace</namespace>
+          <namespace>cicd-$$deploy_suffix</namespace>
           <jenkinsUrl>http://jenkins</jenkinsUrl>
           <jenkinsTunnel>jenkins-jnlp:50000</jenkinsTunnel>
           <containerCap>10</containerCap>
@@ -272,7 +272,7 @@ data:
     <?xml version='1.1' encoding='UTF-8'?>
     <jenkins.model.JenkinsLocationConfiguration>
       <adminAddress>admin@cluster.local</adminAddress>
-      <jenkinsUrl>http://jenkins-$$user.$$dns_suffix</jenkinsUrl>
+      <jenkinsUrl>http://jenkins-$$deploy_suffix.$$dns_suffix</jenkinsUrl>
     </jenkins.model.JenkinsLocationConfiguration>
 
   plugins.txt:
@@ -320,10 +320,12 @@ spec:
   selector:
     matchLabels:
       name: jenkins
+      app: jenkins
   template:
     metadata:
       labels:
         name: jenkins
+        app: jenkins
     spec:
       initContainers:
         - name: installer
