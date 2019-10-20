@@ -73,7 +73,11 @@ spec:
           initialDelaySeconds: 5
           timeoutSeconds: 1
         resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
           limits:
+            cpu: 1
             memory: 512Mi
         volumeMounts:
         - mountPath: /var/lib/pgsql/data
@@ -158,6 +162,13 @@ spec:
             protocol: TCP
         resources: {}
         terminationMessagePath: /dev/termination-log
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1
+            memory: 512Mi
         volumeMounts:
           - name: gogs-data
             mountPath: /opt/gogs/data

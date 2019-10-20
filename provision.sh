@@ -2,7 +2,7 @@
 
 echo "###############################################################################"
 echo "#  MAKE SURE YOU ARE LOGGED IN:                                               #"
-echo "#  $ oc login http://console.your.openshift.com                               #"
+echo "#  k cluster-info                                                             #"
 echo "###############################################################################"
 
 function usage() {
@@ -12,23 +12,19 @@ function usage() {
     echo " $0 --help"
     echo
     echo "Example:"
-    echo " $0 deploy --project-suffix mydemo"
+    echo " $0 deploy --suffix mydemo"
     echo
     echo "COMMANDS:"
     echo "   deploy                   Set up the demo projects and deploy demo apps"
     echo "   delete                   Clean up and remove demo projects and objects"
     echo 
     echo "OPTIONS:"
-    echo "   --user [username]          Optional    The admin user for the demo projects. Required if logged in as system:admin"
-    echo "   --project-suffix [suffix]  Optional    Suffix to be added to demo project names e.g. ci-SUFFIX. If empty, user will be used as suffix"
-    echo "   --ephemeral                Optional    Deploy demo without persistent storage. Default false"
+    echo "   --suffix [suffix]  Required    Suffix to be added to demo project names e.g. ci-SUFFIX."
     echo
 }
 
-ARG_USERNAME=
 ARG_PROJECT_SUFFIX=
 ARG_COMMAND=
-# ARG_EPHEMERAL=false
 
 while :; do
     case $1 in
@@ -37,16 +33,6 @@ while :; do
             ;;
         delete)
             ARG_COMMAND=delete
-            ;;
-        --user)
-            if [ -n "$2" ]; then
-                ARG_USERNAME=$2
-                shift
-            else
-                printf 'ERROR: "--user" requires a non-empty value.\n' >&2
-                usage
-                exit 255
-            fi
             ;;
         --project-suffix)
             if [ -n "$2" ]; then
@@ -58,9 +44,6 @@ while :; do
                 exit 255
             fi
             ;;
-        # --ephemeral)
-        #     ARG_EPHEMERAL=true
-        #     ;;
         -h|--help)
             usage
             exit 0
@@ -85,9 +68,17 @@ done
 # CONFIGURATION                                                                #
 ################################################################################
 
-LOGGEDIN_USER=$(id -un)
-PRJ_SUFFIX=${ARG_PROJECT_SUFFIX:-`echo $LOGGEDIN_USER | sed -e 's/[-@].*//g'`}
+PRJ_SUFFIX="$ARG_PROJECT_SUFFIX"
+if [-z "$PRJ_SUFFIX"]; then
+    echo "Please use '--project-suffix' parameter to sepecify a project suffix."
+    exit 1
+fi
 
+
+#   jenkins: 0.5G 2G
+#   gogs: 0.5G 1G
+#   sonarqube: 1.25G 2.5G
+#   nexus: 0.5G 2Gi
 function deploy() {
   kubectl create namespace dev-$PRJ_SUFFIX
   kubectl create namespace stage-$PRJ_SUFFIX
@@ -95,20 +86,24 @@ function deploy() {
 
   sleep 2
 
-  echo 'Provisioning Jenkins...'
+  echo 'Provisioning applications...'
   kcd cicd-$PRJ_SUFFIX
-  # todo: replace vars
+
+
   ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | k apply -f -
-  sleep 5
+  sleep 3
 
   ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | k apply -f -
-  sleep 5
-  
+  sleep 3
+
   ./templates/tmpl.sh ./templates/sonarqube.yaml ./templates/vars | k apply -f -
-  sleep 5
+  sleep 3
+
+  ./templates/tmpl.sh ./templates/nexus.yaml ./templates/vars | k apply -f -
+  sleep 3
 
   echo "Provisioning installer"
-  oc new-app -f ./cicd-template.yaml -p DEV_PROJECT=dev-$PRJ_SUFFIX -p STAGE_PROJECT=stage-$PRJ_SUFFIX  -n cicd-$PRJ_SUFFIX 
+  ./templates/tmpl.sh ./template/cicd-installer.yaml ./templates/vars | kubectl create -f
 }
 
 function kcd() {
@@ -159,3 +154,4 @@ popd >/dev/null
 END=`date +%s`
 echo "(Completed in $(( ($END - $START)/60 )) min $(( ($END - $START)%60 )) sec)"
 echo 
+

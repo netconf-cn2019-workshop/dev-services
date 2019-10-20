@@ -80,11 +80,11 @@ spec:
           successThreshold: 1
           timeoutSeconds: 1
         resources:
-          limits:
-            memory: 1Gi
-            cpu: 1
           requests:
-            cpu: 500m
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1
             memory: 512Mi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File

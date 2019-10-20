@@ -158,8 +158,12 @@ spec:
             periodSeconds: 3
             timeoutSeconds: 15
           resources:
+            requests:
+              memory: 512Mi
+              cpu: 200m
             limits:
               memory: 1024Mi
+              cpu: 1
           volumeMounts: 
             - mountPath: /tmp
               name: tmp

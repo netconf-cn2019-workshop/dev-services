@@ -24,7 +24,7 @@ subjects:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cicd-demo-installer
+  name: cicd-installer
 spec:
   activeDeadlineSeconds: 400
   completions: 1
@@ -99,77 +99,8 @@ spec:
 
 
 
+              # kubectl rollout status deployment/nexus
+              # NEXUS_POD=$(k get pod -l app=nexus -o=jsonpath='{.items[0].metadata.name}')
+              # kubectl exec ${NEXUS_POD} -- /bin/bash -c 'curl -o /tmp/nexus-functions -s https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/scripts/nexus-functions; source /tmp/nexus-functions; add_nexus3_redhat_repos admin admin123 http://localhost:8081'
 
-
-
-
-              kubectl rollout status deployment/nexus
-              NEXUS_POD=$(k get pod -l app=nexus -o=jsonpath='{.items[0].metadata.name}')
-              kubectl exec ${NEXUS_POD} -- /bin/bash -c 'curl -o /tmp/nexus-functions -s https://raw.githubusercontent.com/OpenShiftDemos/nexus/master/scripts/nexus-functions; source /tmp/nexus-functions; add_nexus3_redhat_repos admin admin123 http://localhost:8081'
-
-
-
-              GOGS_SVC=$(kubectl get svc gogs -o template --template='{{.spec.clusterIP}}')
-              GOGS_USER=gogs
-              GOGS_PWD=gogs
-
-              kubectl rollout status deployment/gogs
-
-              _RETURN=$(curl -o /tmp/curl.log -sL --post302 -w "%{http_code}" http://$GOGS_SVC:3000/user/sign_up \
-                --form user_name=$GOGS_USER \
-                --form password=$GOGS_PWD \
-                --form retype=$GOGS_PWD \
-                --form email=admin@gogs.com)
-
-              sleep 5
-
-              if [ $_RETURN != "200" ] && [ $_RETURN != "302" ] ; then
-                echo "ERROR: Failed to create Gogs admin"
-                cat /tmp/curl.log
-                exit 255
-              fi
-
-              sleep 10
-
-              cat <<EOF > /tmp/data.json
-              {
-                "clone_addr": "https://github.com/OpenShiftDemos/openshift-tasks.git",
-                "uid": 1,
-                "repo_name": "openshift-tasks"
-              }
-              EOF
-
-              _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
-              -u $GOGS_USER:$GOGS_PWD -X POST http://$GOGS_SVC:3000/api/v1/repos/migrate -d @/tmp/data.json)
-
-              if [ $_RETURN != "201" ] ;then
-                echo "ERROR: Failed to import openshift-tasks GitHub repo"
-                cat /tmp/curl.log
-                exit 255
-              fi
-
-              sleep 5
-
-              cat <<EOF > /tmp/data.json
-              {
-                "type": "gogs",
-                "config": {
-                  "url": "http://jenkins.${CICD_NAMESPACE}.svc.cluster.local/job/openshift-tasks/build?token=AMRAAIPvxjPpotgUZsyG",
-                  "content_type": "json"
-                },
-                "events": [
-                  "push"
-                ],
-                "active": true
-              }
-              EOF
-
-              _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
-              -u $GOGS_USER:$GOGS_PWD -X POST http://$GOGS_SVC:3000/api/v1/repos/gogs/openshift-tasks/hooks -d @/tmp/data.json)
-
-              if [ $_RETURN != "201" ] ; then
-                echo "ERROR: Failed to set webhook"
-                cat /tmp/curl.log
-                exit 255
-              fi
 
