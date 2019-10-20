@@ -89,17 +89,16 @@ function deploy() {
   echo 'Provisioning applications...'
   kcd cicd-$PRJ_SUFFIX
 
-
   ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | k apply -f -
-  sleep 3
-
-  ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | k apply -f -
   sleep 3
 
   ./templates/tmpl.sh ./templates/sonarqube.yaml ./templates/vars | k apply -f -
   sleep 3
 
   ./templates/tmpl.sh ./templates/nexus.yaml ./templates/vars | k apply -f -
+  sleep 3
+
+  ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | k apply -f -
   sleep 3
 
   echo "Provisioning installer"

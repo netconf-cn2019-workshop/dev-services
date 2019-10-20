@@ -83,121 +83,6 @@ spec:
           servicePort: 80
 
 ---
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: jenkins
-  labels:
-    app: jenkins
-spec:
-  replicas: 1
-  strategy: 
-    type: Recreate
-  selector:
-    matchLabels:
-      name: jenkins
-  template:
-    metadata:
-      labels:
-        name: jenkins
-    spec:
-      initContainers:
-        - name: installer
-          image: dockerhub.azk8s.cn/jenkins/jenkins:2.190.1
-          command: [ "sh", "/var/jenkins_config/apply_config.sh" ]
-          env:            
-            - name: JENKINS_UC
-              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.190/update-center.json
-            - name: JENKINS_UC_DOWNLOAD
-              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins
-          volumeMounts: 
-            - name: tmp
-              mountPath: /tmp              
-            - name: jenkins-config
-              mountPath: /var/jenkins_config
-            - name: jenkins-jobs
-              mountPath: /var/jenkins_jobs
-            - name: jenkins-home
-              mountPath: /var/jenkins_home              
-            - name: plugins
-              mountPath: /usr/share/jenkins/ref/plugins
-            - name: plugin-dir
-              mountPath: /var/jenkins_plugins
-      containers:
-        - name: jenkins
-          image: dockerhub.azk8s.cn/jenkins/jenkins:2.190.1
-          env:            
-            - name: JAVA_OPTS
-              value: '-Djenkins.install.runSetupWizard=false'
-            - name: JENKINS_OPTS
-              value: '--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin'
-            - name: TZ
-              value: Asia/Shanghai
-            - name: JENKINS_UC
-              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.190/update-center.json
-            - name: JENKINS_UC_DOWNLOAD
-              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins
-          ports:
-            - name: http-port
-              containerPort: 8080
-            - name: jnlp-port
-              containerPort: 50000
-          livenessProbe:
-            failureThreshold: 2
-            httpGet: 
-              path: /login
-              port: 8080        
-            initialDelaySeconds: 600
-            periodSeconds: 60
-            timeoutSeconds: 240
-          readinessProbe:
-            httpGet:
-              path: /login
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 3
-            timeoutSeconds: 15
-          resources:
-            requests:
-              memory: 512Mi
-              cpu: 200m
-            limits:
-              memory: 1024Mi
-              cpu: 1
-          volumeMounts: 
-            - mountPath: /tmp
-              name: tmp
-            - name: jenkins-home
-              mountPath: /var/jenkins_home
-              readOnly: false
-            - mountPath: /var/jenkins_config
-              name: jenkins-config
-              readOnly: true
-            - mountPath: /var/jenkins_jobs
-              name: jenkins-jobs
-              readOnly: true
-            - name: plugin-dir
-              mountPath: /usr/share/jenkins/ref/plugins/
-              readOnly: false
-      dnsPolicy: ClusterFirst
-      restartPolicy: Always
-      serviceAccountName: jenkins
-      volumes:
-        - name: plugins
-          emptyDir: {}
-        - name: tmp
-          emptyDir: {}
-        - name: plugin-dir
-          emptyDir: {}
-        - name: jenkins-home
-          emptyDir: {}
-        - name: jenkins-config
-          configMap:
-            name: jenkins
-        - name: jenkins-jobs
-          configMap:
-            name: jenkins-jobs
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -205,7 +90,7 @@ metadata:
   labels:
     app: jenkins
 data:
-  dotnet-build: |-
+  hello-dotnet: |-
     <?xml version='1.1' encoding='UTF-8'?>
     <project>
       <actions/>
@@ -221,14 +106,14 @@ data:
       <concurrentBuild>false</concurrentBuild>
       <builders>
         <hudson.tasks.Shell>
-          <command>echo &quot;Hello world from .NET Core SDK $(dotnet --version)&quot;</command>
+          <command>set +x; echo &quot;Hello world from .NET Core SDK $(dotnet --version)&quot;</command>
         </hudson.tasks.Shell>
       </builders>
       <publishers/>
       <buildWrappers/>
     </project>
 
-  dotnetclub: |-
+  $$gogs_repo_name: |-
       <?xml version='1.1' encoding='UTF-8'?>
       <flow-definition plugin="workflow-job@2.35">
         <actions/>
@@ -239,7 +124,7 @@ data:
           <script>
       node(&quot;dotnet&quot;) {
         stage(&apos;Fetch Code&apos;) {
-            git branch: &apos;master&apos;, url: &apos;https://github.com/dotnetclub-net/dotnetclub.git&apos;
+            git branch: &apos;master&apos;, url: &apos;http:/gogs:3000/admin/$$gogs_repo_name.git&apos;
         }
         stage(&apos;Build App&apos;) {
           sh &quot;dotnet build&quot;
@@ -419,3 +304,120 @@ data:
       mkdir -p /var/jenkins_home/jobs/$job
       yes | cp -i /var/jenkins_jobs/$job /var/jenkins_home/jobs/$job/config.xml
     done
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  strategy: 
+    type: Recreate
+  selector:
+    matchLabels:
+      name: jenkins
+  template:
+    metadata:
+      labels:
+        name: jenkins
+    spec:
+      initContainers:
+        - name: installer
+          image: dockerhub.azk8s.cn/jenkins/jenkins:2.190.1
+          command: [ "sh", "/var/jenkins_config/apply_config.sh" ]
+          env:            
+            - name: JENKINS_UC
+              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.190/update-center.json
+            - name: JENKINS_UC_DOWNLOAD
+              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins
+          volumeMounts: 
+            - name: tmp
+              mountPath: /tmp              
+            - name: jenkins-config
+              mountPath: /var/jenkins_config
+            - name: jenkins-jobs
+              mountPath: /var/jenkins_jobs
+            - name: jenkins-home
+              mountPath: /var/jenkins_home              
+            - name: plugins
+              mountPath: /usr/share/jenkins/ref/plugins
+            - name: plugin-dir
+              mountPath: /var/jenkins_plugins
+      containers:
+        - name: jenkins
+          image: dockerhub.azk8s.cn/jenkins/jenkins:2.190.1
+          env:            
+            - name: JAVA_OPTS
+              value: '-Djenkins.install.runSetupWizard=false'
+            - name: JENKINS_OPTS
+              value: '--argumentsRealm.passwd.admin=admin --argumentsRealm.roles.admin=admin'
+            - name: TZ
+              value: Asia/Shanghai
+            - name: JENKINS_UC
+              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.190/update-center.json
+            - name: JENKINS_UC_DOWNLOAD
+              value: https://mirrors.tuna.tsinghua.edu.cn/jenkins
+          ports:
+            - name: http-port
+              containerPort: 8080
+            - name: jnlp-port
+              containerPort: 50000
+          livenessProbe:
+            failureThreshold: 2
+            httpGet: 
+              path: /login
+              port: 8080        
+            initialDelaySeconds: 600
+            periodSeconds: 60
+            timeoutSeconds: 240
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 3
+            timeoutSeconds: 15
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 200m
+            limits:
+              memory: 1024Mi
+              cpu: 1
+          volumeMounts: 
+            - mountPath: /tmp
+              name: tmp
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+              readOnly: false
+            - mountPath: /var/jenkins_config
+              name: jenkins-config
+              readOnly: true
+            - mountPath: /var/jenkins_jobs
+              name: jenkins-jobs
+              readOnly: true
+            - name: plugin-dir
+              mountPath: /usr/share/jenkins/ref/plugins/
+              readOnly: false
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      serviceAccountName: jenkins
+      volumes:
+        - name: plugins
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+        - name: plugin-dir
+          emptyDir: {}
+        - name: jenkins-home
+          emptyDir: {}
+        - name: jenkins-config
+          configMap:
+            name: jenkins
+        - name: jenkins-jobs
+          configMap:
+            name: jenkins-jobs
