@@ -34,12 +34,12 @@ while :; do
         delete)
             ARG_COMMAND=delete
             ;;
-        --project-suffix)
+        --suffix)
             if [ -n "$2" ]; then
                 ARG_PROJECT_SUFFIX=$2
                 shift
             else
-                printf 'ERROR: "--project-suffix" requires a non-empty value.\n' >&2
+                printf 'ERROR: "--suffix" requires a non-empty value.\n' >&2
                 usage
                 exit 255
             fi
@@ -69,7 +69,7 @@ done
 ################################################################################
 
 PRJ_SUFFIX="$ARG_PROJECT_SUFFIX"
-if [-z "$PRJ_SUFFIX"]; then
+if [ -z "$PRJ_SUFFIX" ]; then
     echo "Please use '--project-suffix' parameter to sepecify a project suffix."
     exit 1
 fi
@@ -89,20 +89,28 @@ function deploy() {
   echo 'Provisioning applications...'
   kcd cicd-$PRJ_SUFFIX
 
-  ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | k apply -f -
+  ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | kubectl apply -f -
   sleep 3
 
-  ./templates/tmpl.sh ./templates/sonarqube.yaml ./templates/vars | k apply -f -
+  ./templates/tmpl.sh ./templates/sonarqube.yaml ./templates/vars | kubectl apply -f -
   sleep 3
 
-  ./templates/tmpl.sh ./templates/nexus.yaml ./templates/vars | k apply -f -
+  ./templates/tmpl.sh ./templates/nexus.yaml ./templates/vars | kubectl apply -f -
   sleep 3
 
-  ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | k apply -f -
+  ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | kubectl apply -f -
   sleep 3
 
   echo "Provisioning installer"
-  ./templates/tmpl.sh ./template/cicd-installer.yaml ./templates/vars | kubectl create -f
+  ./templates/tmpl.sh ./templates/cicd-installer.yaml ./templates/vars | kubectl apply -f -
+
+  sleep 3
+  echo "Wait for installing..."
+  local _INSTALLER_POD=$(kubectl get pods -o=jsonpath='{.items[0].metadata.name}' -l job-name=cicd-installer)
+  kubectl wait --for=condition=complete --timeout=600s job/cicd-installer
+
+  kubectl logs pods/$_INSTALLER_POD
+  echo "Installation completed."
 }
 
 function kcd() {
@@ -120,7 +128,7 @@ function echo_header() {
 # MAIN: DEPLOY CICD Workshop                                                   #
 ################################################################################
 
-pushd ~ >/dev/null
+
 START=`date +%s`
 
 echo_header ".NET Core CI/CD Workshop on Kubernetes ($(date))"
@@ -148,7 +156,6 @@ case "$ARG_COMMAND" in
         ;;
 esac
 
-popd >/dev/null
 
 END=`date +%s`
 echo "(Completed in $(( ($END - $START)/60 )) min $(( ($END - $START)%60 )) sec)"

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: cicd_installer
+  name: cicd-installer
   labels:
     app: installer
 
@@ -20,7 +20,7 @@ roleRef:
   name: admin
 subjects:
   - kind: ServiceAccount
-    name: cicd_installer
+    name: cicd-installer
 
 
 ---
@@ -32,26 +32,37 @@ metadata:
     app: installer
 data:
   init.sh: |-
-      GOGS_USER=admin
-      GOGS_PWD=admin
+      set -x 
+      set -e
+
+      kubectl config set-cluster kube --server=https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT --certificate-authority=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      kubectl config set-context kube --cluster=kube
+      kubectl config set-credentials user --token="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+      kubectl config set-context kube --user=user
+      kubectl config use-context kube
+      kubectl config set-context $(kubectl config current-context) --namespace $(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
 
       kubectl rollout status deployment/gogs
+
+      
+      GOGS_USER=gogs
+      GOGS_PWD=gogs
 
       _RETURN=$(curl -o /tmp/curl.log -sL --post302 -w "%{http_code}" http://gogs:3000/user/sign_up \
       --form user_name=$GOGS_USER \
       --form password=$GOGS_PWD \
       --form retype=$GOGS_PWD \
-      --form email=admin@gogs.com)
+      --form email=gogs@gogs.com)
 
       sleep 5
 
       if [ $_RETURN != "200" ] && [ $_RETURN != "302" ] ; then
-      echo "ERROR: Failed to create Gogs admin"
+      echo "ERROR: Failed to create default Gogs user 'gogs'"
       cat /tmp/curl.log
       exit 255
       fi
 
-      sleep 10
+      sleep 5
 
       cat <<EOF > /tmp/data.json
       {
@@ -61,13 +72,16 @@ data:
       }
       EOF
 
-      _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
-      -u $GOGS_USER:$GOGS_PWD -X POST http://gogs:3000/api/v1/repos/migrate -d @/tmp/data.json)
+      _RETURN=$(curl -sL -w "%{http_code}" http://gogs:3000/$GOGS_USER/$$gogs_repo_name -o /dev/null)
+      if [ $_RETURN = "404" ] ;then
+        _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
+        -u $GOGS_USER:$GOGS_PWD -X POST http://gogs:3000/api/v1/repos/migrate -d @/tmp/data.json)
 
-      if [ $_RETURN != "201" ] ;then
-      echo "ERROR: Failed to import repo $$import_repo"
-      cat /tmp/curl.log
-      exit 255
+        if [ $_RETURN != "201" ] ;then
+          echo "ERROR: Failed to import repo $$import_repo"
+          cat /tmp/curl.log
+          exit 255
+        fi
       fi
 
 
@@ -77,14 +91,14 @@ data:
         local _NEXUS_PWD=$2
         local _NEXUS_URL=$3
 
-        read -r -d '' _DISABLE_JSON << EOM
+      _DISABLE_JSON=$(cat << EOM
       {
         "name": "disable_outreach",
         "type": "groovy",
         "content": "capabilityRegistry = container.lookup(org.sonatype.nexus.capability.CapabilityRegistry.class)\ncapabilityRegistry.all.findAll {it.context().type().toString().startsWith(\"Outreach\")}.each {\ncapabilityRegistry.disable(it.context().id())\n}"
       }
       EOM
-
+      )
         curl -v -H "Accept: application/json" -H "Content-Type: application/json" -d "$_DISABLE_JSON" -u "$_NEXUS_USER:$_NEXUS_PWD" "${_NEXUS_URL}/service/rest/v1/script/"
         curl -v -X POST -H "Content-Type: text/plain" -u "$_NEXUS_USER:$_NEXUS_PWD" "${_NEXUS_URL}/service/rest/v1/script/disable_outreach/run"
       }
@@ -94,18 +108,20 @@ data:
         local _NEXUS_PWD=$2
         local _NEXUS_URL=$3
 
-        read -r -d '' _CHG_PWD_JSON << EOM
+      _CHG_PWD_JSON=$(cat << EOM
       {
         "name": "reset_password",
         "type": "groovy",
         "content": "security.securitySystem.changePassword('admin','admin')"
       }
       EOM
-
+      )
 
         curl -v -H "Accept: application/json" -H "Content-Type: application/json" -d "$_CHG_PWD_JSON" -u "$_NEXUS_USER:$_NEXUS_PWD" "${_NEXUS_URL}/service/rest/v1/script/"
         curl -v -X POST -H "Content-Type: text/plain" -u "$_NEXUS_USER:$_NEXUS_PWD" "${_NEXUS_URL}/service/rest/v1/script/reset_password/run"
       }
+
+      kubectl rollout status deployment/nexus
 
       disable_outreach admin admin123 'http://nexus:8081'
       change_admin_password admin admin123 'http://nexus:8081'
@@ -127,17 +143,16 @@ spec:
   parallelism: 1
   template:
     spec:
-      serviceAccountName: cicd_installer
+      serviceAccountName: cicd-installer
       restartPolicy: Never
       containers:
         - name: cicd-installer-job
-          image: openshift/origin:v3.11
+          image: dockerhub.azk8s.cn/jijiechen/kubectl:v1.16.0
           volumeMounts:            
             - name: init-script
               mountPath: /var/init-script
           command:
-            - /bin/bash
-            - -x
+            - /bin/sh
             - /var/init-script/init.sh
       volumes:
         - name: init-script
