@@ -44,6 +44,7 @@ data:
 
       kubectl rollout status deployment/gogs
 
+      sleep 5
       
       GOGS_USER=gogs
       GOGS_PWD=gogs

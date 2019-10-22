@@ -104,12 +104,11 @@ function deploy() {
   echo "Provisioning installer"
   ./templates/tmpl.sh ./templates/cicd-installer.yaml ./templates/vars | kubectl apply -f -
 
-  sleep 3
   echo "Wait for installing..."
-  local _INSTALLER_POD=$(kubectl get pods -o=jsonpath='{.items[0].metadata.name}' -l job-name=cicd-installer)
-  kubectl wait --for=condition=complete --timeout=600s job/cicd-installer
-
-  kubectl logs pods/$_INSTALLER_POD
+  sleep 3
+  kubectl get job/cicd-installer -o=jsonpath='{.status}' --watch --watch-only
+  
+  kubectl logs pods/$(kubectl get pods -o=jsonpath='{.items[0].metadata.name}' -l job-name=cicd-installer)
   echo "Installation completed."
 }
 
