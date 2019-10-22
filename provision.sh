@@ -88,7 +88,14 @@ function deploy() {
 
   echo 'Provisioning applications...'
   kcd cicd-$PRJ_SUFFIX
-
+  
+  local _SED_EXPR="s/deploy_suffix=.*/deploy_suffix=$PRJ_SUFFIX/g"
+  if [ "$(uname)" == "Darwin" ]; then
+    sed -i '' $_SED_EXPR ./templates/vars
+  else
+    sed -i $_SED_EXPR ./templates/vars
+  fi
+  
   ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | kubectl apply -f -
   sleep 3
 

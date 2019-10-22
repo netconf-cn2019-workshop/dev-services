@@ -74,7 +74,7 @@ data:
       EOF
 
       _RETURN=$(curl -sL -w "%{http_code}" http://gogs:3000/$GOGS_USER/$$gogs_repo_name -o /dev/null)
-      if [ $_RETURN = "404" ] ;then
+      if [ $_RETURN == "404" ] ;then
         _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
         -u $GOGS_USER:$GOGS_PWD -X POST http://gogs:3000/api/v1/repos/migrate -d @/tmp/data.json)
 
