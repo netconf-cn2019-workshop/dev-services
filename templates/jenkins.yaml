@@ -185,7 +185,7 @@ data:
               <containers>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                   <name>jnlp</name>
-                  <image>dockerhub.azk8s.cn/jijiechen/dotnet-30-jenkins-slave-rhel7:3.0</image>
+                  <image>dockerhub.azk8s.cn/jijiechen/dotnet-30-jenkins-slave-cent7:latest</image>
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
                   <workingDir>/home/jenkins/agent</workingDir>
