@@ -70,7 +70,7 @@ done
 
 PRJ_SUFFIX="$ARG_PROJECT_SUFFIX"
 if [ -z "$PRJ_SUFFIX" ]; then
-    echo "Please use '--project-suffix' parameter to sepecify a project suffix."
+    echo "Please use '--suffix' parameter to sepecify a project suffix."
     exit 1
 fi
 

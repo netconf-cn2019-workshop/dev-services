@@ -212,6 +212,14 @@ data:
                       <key>TZ</key>
                       <value>Asia/Shanghai</value>
                     </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>DEPLOY_SUFFIX</key>
+                      <value>$$deploy_suffix</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>DNS_SUFFIX</key>
+                      <value>$$dns_suffix</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                   </envVars>
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
               </containers>

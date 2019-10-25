@@ -1,0 +1,313 @@
+
+#
+# Redis Deployment + Service
+#
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis
+  labels:
+    app: redis
+    tier: infrastructure
+spec:
+  selector:
+    app: redis
+    tier: infrastructure
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+    targetPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+      tier: infrastructure
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        tier: infrastructure
+    spec:
+      containers:
+        - name: redis
+          image: dockerhub.azk8s.cn/library/redis:5.0.6
+          imagePullPolicy: IfNotPresent        
+          ports:
+            - name: redis
+              containerPort: 6379
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 50
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 15
+            periodSeconds: 3
+
+---
+#
+# Rabbit MQ Deployment + Service
+#
+kind: Service
+apiVersion: v1
+metadata:
+  name: rabbit
+  labels:
+    app: rabbit
+    tier: infrastructure
+spec:
+  selector:
+    app: rabbit
+    tier: infrastructure
+  ports:
+  - name: rabbit
+    protocol: TCP
+    port: 5672
+    targetPort: 5672
+  - name: management
+    protocol: TCP
+    port: 15672
+    targetPort: 15672
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbit
+spec:
+  selector:
+    matchLabels:
+      app: rabbit
+      tier: infrastructure
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: rabbit
+        tier: infrastructure
+    spec:
+      containers:
+        - name: rabbit
+          image: dockerhub.azk8s.cn/library/rabbitmq:3.8-management
+          imagePullPolicy: IfNotPresent        
+          ports:
+            - name: rabbit
+              containerPort: 5672
+          livenessProbe:
+            tcpSocket:
+              port: rabbit
+            initialDelaySeconds: 50
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: rabbit
+            initialDelaySeconds: 15
+            periodSeconds: 3
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: schema-init-script
+  labels:
+    app: sqlserver
+data:
+  init-schema.sql: |-
+    ---
+    --- Products Database
+    ---
+    CREATE DATABASE [Ecommerce.Products];
+    GO
+
+    USE [Ecommerce.Products];
+    GO
+
+    CREATE TABLE [dbo].[Products](
+        [ProductID] [int] IDENTITY(1,1) NOT NULL,
+        [Name] [nvarchar](max) NULL,
+        [Quantity] [int] NULL,
+        [Price] [float] NULL,
+    CONSTRAINT [PK_Products] PRIMARY KEY CLUSTERED 
+    (
+        [ProductID] ASC
+    )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+    
+    GO
+
+    INSERT INTO [dbo].[Products] VALUES ('Carrots', 15, 153)
+    INSERT INTO [dbo].[Products] VALUES ('Meat', 100, 200)
+    INSERT INTO [dbo].[Products] VALUES ('Beans', 150, 300)
+    GO
+
+    ---
+    --- Customers Database
+    ---
+    CREATE DATABASE [Ecommerce.Customers];
+    GO
+
+    USE [Ecommerce.Customers];
+    GO
+
+    CREATE TABLE [dbo].[Customers](
+        [CustomerID] [int] IDENTITY(1,1) NOT NULL,
+        [FirstName] [nvarchar](max) NOT NULL,
+      [LastName] [nvarchar](max) NOT NULL,
+    CONSTRAINT [PK_Customers] PRIMARY KEY CLUSTERED 
+    (
+        [CustomerID] ASC
+    )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+    
+    GO
+
+    INSERT INTO [dbo].[Customers] VALUES ('John', 'Kowalski')
+    INSERT INTO [dbo].[Customers] VALUES ('Roman', 'Polanski')
+    INSERT INTO [dbo].[Customers] VALUES ('Jeff', 'Bridges')
+    GO
+
+    ---
+    --- Sales Database
+    ---
+    CREATE DATABASE [Ecommerce.Sales];
+    GO
+
+    USE [Ecommerce.Sales];
+    GO
+
+    CREATE TABLE [dbo].[Orders](
+        [OrderId] [int] IDENTITY(1,1) NOT NULL,
+        [CustomerId] [int] NOT NULL,
+        [Status] [int] NOT NULL,
+        [Total] [float] NOT NULL,
+    CONSTRAINT [PK_Orders] PRIMARY KEY CLUSTERED 
+    (
+        [OrderId] ASC
+    )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    )
+    GO
+
+    CREATE TABLE [dbo].[OrderItems](
+        [OrderItemId] [int] IDENTITY(1,1) NOT NULL,
+        [OrderId] [int] NOT NULL,
+      [ProductId] [int] NOT NULL,
+        [Name] [nvarchar](max) NULL,
+        [Quantity] [int] NULL,
+        [Price] [float] NULL,
+
+    CONSTRAINT [PK_OrderItems] PRIMARY KEY CLUSTERED ([OrderItemId] ASC)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY],
+    CONSTRAINT [FK_OrderItems_Orders] FOREIGN KEY ([OrderId]) REFERENCES [dbo].[Orders] ([OrderId])
+    )
+    GO
+    
+    ---
+    --- Reporting Database
+    ---
+    CREATE DATABASE [Ecommerce.Reporting];
+    GO
+
+    USE [Ecommerce.Reporting];
+    GO
+
+    CREATE TABLE [dbo].[Orders](
+        [OrderId] [int] NOT NULL,
+        [CustomerId] [int] NOT NULL,
+        [FirstName] [nvarchar](max) NOT NULL,
+      [LastName] [nvarchar](max) NOT NULL,
+        [Status] [int] NOT NULL,
+        [Total] [float] NOT NULL,
+    CONSTRAINT [PK_Orders] PRIMARY KEY CLUSTERED 
+    (
+        [OrderId] ASC
+    )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    )
+    GO
+  
+---
+
+#
+# SQL Server Deployment + Service
+#
+kind: Service
+apiVersion: v1
+metadata:
+  name: sqlserver
+  labels:
+    app: sqlserver
+    tier: infrastructure
+spec:
+  selector:
+    app: sqlserver
+    tier: infrastructure
+  ports:
+  - name: sqlserver
+    protocol: TCP
+    port: 1433
+    targetPort: 1433
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlserver
+spec:
+  selector:
+    matchLabels:
+      app: sqlserver
+      tier: infrastructure
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sqlserver
+        tier: infrastructure
+    spec:
+      containers:
+        - name: sqlserver
+          image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1433
+              name: mssql
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: SA_PASSWORD
+              value: "Zaq123#!"
+          volumeMounts: 
+            - mountPath: /var/init-script/init-schema.sql
+              name: init-script
+              subPath: init-schema.sql
+              readOnly: true
+          livenessProbe:
+             tcpSocket:
+               port: mssql
+             initialDelaySeconds: 15
+             periodSeconds: 20
+          readinessProbe:
+             tcpSocket:
+               port: mssql
+             initialDelaySeconds: 5
+             periodSeconds: 10
+          resources:
+            requests:
+              cpu: 0.2
+              memory: 1Gi
+            limits:
+              cpu: 0.5
+              memory: 2Gi
+      volumes:
+        - name: init-script
+          configMap:
+            name: schema-init-script
