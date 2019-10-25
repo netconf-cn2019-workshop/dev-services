@@ -2,7 +2,7 @@
 
 echo "###############################################################################"
 echo "#  MAKE SURE YOU ARE LOGGED IN:                                               #"
-echo "#  k cluster-info                                                             #"
+echo "#  kubectl cluster-info                                                             #"
 echo "###############################################################################"
 
 function usage() {
@@ -91,25 +91,25 @@ function deploy() {
   
   local _SED_EXPR="s/deploy_suffix=.*/deploy_suffix=$PRJ_SUFFIX/g"
   if [ "$(uname)" == "Darwin" ]; then
-    sed -i '' $_SED_EXPR ./templates/vars
+    sed -i '' $_SED_EXPR ./cicd-infra/vars
   else
-    sed -i $_SED_EXPR ./templates/vars
+    sed -i $_SED_EXPR ./cicd-infra/vars
   fi
   
-  ./templates/tmpl.sh ./templates/jenkins.yaml ./templates/vars | kubectl apply -f -
+  ./tmpl.sh ./cicd-infra/jenkins.yaml ./cicd-infra/vars | kubectl apply -f -
   sleep 3
 
-  ./templates/tmpl.sh ./templates/sonarqube.yaml ./templates/vars | kubectl apply -f -
+  ./tmpl.sh ./cicd-infra/sonarqube.yaml ./cicd-infra/vars | kubectl apply -f -
   sleep 3
 
-  ./templates/tmpl.sh ./templates/nexus.yaml ./templates/vars | kubectl apply -f -
+  ./tmpl.sh ./cicd-infra/nexus.yaml ./cicd-infra/vars | kubectl apply -f -
   sleep 3
 
-  ./templates/tmpl.sh ./templates/gogs.yaml ./templates/vars | kubectl apply -f -
+  ./tmpl.sh ./cicd-infra/gogs.yaml ./cicd-infra/vars | kubectl apply -f -
   sleep 3
 
   echo "Provisioning installer"
-  ./templates/tmpl.sh ./templates/cicd-installer.yaml ./templates/vars | kubectl apply -f -
+  ./tmpl.sh ./cicd-infra/cicd-installer.yaml ./cicd-infra/vars | kubectl apply -f -
 
   echo "Wait for installing..."
   sleep 3
@@ -131,13 +131,13 @@ function echo_header() {
 }
 
 ################################################################################
-# MAIN: DEPLOY CICD Workshop                                                   #
+# MAIN: DEPLOY Workshop                                                   #
 ################################################################################
 
 
 START=`date +%s`
 
-echo_header ".NET Core CI/CD Workshop on Kubernetes ($(date))"
+echo_header ".NET Core Workshop on Kubernetes ($(date))"
 
 case "$ARG_COMMAND" in
     delete)
