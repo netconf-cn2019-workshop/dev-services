@@ -275,7 +275,7 @@ spec:
     spec:
       containers:
         - name: sqlserver
-          image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+          image: registry.cn-hangzhou.aliyuncs.com/microsoft_mirror/sqlserver:2017-latest-ubuntu
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 1433
