@@ -7,6 +7,20 @@ if [ -z "$VAR_FILE" ]; then
     VAR_FILE='./vars'
 fi
 
+dump_envvars() {
+
+    if [ -f "$VAR_FILE" ]; then
+        cat $VAR_FILE
+    fi
+
+    compgen -v | while read -r VARNAME; do
+        PREFIX="${VARNAME:0:4}"
+        if [ "$PREFIX" == "ARG_" ] ; then
+            echo "${VARNAME:4}=${!VARNAME}"
+        fi
+    done
+}
+
 tmpl() {
     local FILENAME
     local CONTENT
@@ -15,7 +29,10 @@ tmpl() {
     
     FILENAME=$1
     CONTENT=`cat $FILENAME`
-    VARS=`cat $VAR_FILE`
+
+    VARS=`dump_envvars`
+    echo "printing all vars"
+    echo "$VARS"
 
     for VAR in $VARS; do
         KEY="${VAR%%=*}"
