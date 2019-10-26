@@ -31,8 +31,6 @@ tmpl() {
     CONTENT=`cat $FILENAME`
 
     VARS=`dump_envvars`
-    echo "printing all vars"
-    echo "$VARS"
 
     for VAR in $VARS; do
         KEY="${VAR%%=*}"
