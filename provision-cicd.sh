@@ -82,6 +82,7 @@ fi
 function deploy() {
   kubectl create namespace dev-$PRJ_SUFFIX
   kubectl create namespace stage-$PRJ_SUFFIX
+  kubectl create namespace prod-$PRJ_SUFFIX
   kubectl create namespace cicd-$PRJ_SUFFIX
 
   sleep 2
@@ -142,7 +143,7 @@ echo_header ".NET Core Workshop on Kubernetes ($(date))"
 case "$ARG_COMMAND" in
     delete)
         echo "Delete demo..."
-        kubectl delete namespace dev-$PRJ_SUFFIX stage-$PRJ_SUFFIX cicd-$PRJ_SUFFIX
+        kubectl delete namespace dev-$PRJ_SUFFIX stage-$PRJ_SUFFIX prod-$PRJ_SUFFIX cicd-$PRJ_SUFFIX
         echo
         echo "Delete completed successfully!"
         kcd default
