@@ -1,7 +1,7 @@
-ECommerce.Catalog.Api:catalog-api:20191027-155049
-ECommerce.Customers.Api:customers-api:20191027-155049
-ECommerce.Payment.Host:payment-host:20191027-155049
-ECommerce.Reporting.Api:reporting-api:20191027-122712
-ECommerce.Sales.Api:sales-api:20191027-155049
-ECommerce.Shipping.Host:shipping-host:20191027-155049
-ECommerce.WebApp:webapp:20191027-124238
+ECommerce.Catalog.Api:catalog-api:20191027-180027
+ECommerce.Customers.Api:customers-api:20191027-180027
+ECommerce.Payment.Host:payment-host:20191027-180027
+ECommerce.Reporting.Api:reporting-api:20191027-180027
+ECommerce.Sales.Api:sales-api:20191027-180027
+ECommerce.Shipping.Host:shipping-host:20191027-180027
+ECommerce.WebApp:webapp:20191027-183432

@@ -54,5 +54,5 @@ kubectl delete deployments,services,configmaps -l tier=infrastructure
 
 ```
 # 请先切换到正确的 Kubernetes namespace 下
-kubectl delete deployments,services,configmaps -l tier=backend -l tier=frontend
+kubectl delete deployments,services,configmaps,ingress -l 'tier in (backend, frontend)'
 ```
