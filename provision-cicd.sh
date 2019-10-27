@@ -80,10 +80,10 @@ fi
 #   sonarqube: 1.25G 2.5G
 #   nexus: 0.5G 2Gi
 function deploy() {
-  kubectl create namespace dev-$PRJ_SUFFIX
-  kubectl create namespace stage-$PRJ_SUFFIX
-  kubectl create namespace prod-$PRJ_SUFFIX
-  kubectl create namespace cicd-$PRJ_SUFFIX
+  kubectl create namespace dev-$PRJ_SUFFIX || true
+  kubectl create namespace stage-$PRJ_SUFFIX || true
+  kubectl create namespace prod-$PRJ_SUFFIX || true
+  kubectl create namespace cicd-$PRJ_SUFFIX || true
 
   sleep 2
 
