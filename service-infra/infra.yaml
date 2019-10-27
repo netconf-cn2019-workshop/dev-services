@@ -25,6 +25,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
+  labels:
+    app: redis
+    tier: infrastructure  
 spec:
   selector:
     matchLabels:
@@ -84,6 +87,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: rabbit
+  labels:
+    app: rabbit
+    tier: infrastructure
 spec:
   selector:
     matchLabels:
@@ -122,6 +128,7 @@ metadata:
   name: schema-init-script
   labels:
     app: sqlserver
+    tier: infrastructure
 data:
   init-schema.sql: |-
     ---
@@ -261,6 +268,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: sqlserver
+  labels:
+    app: sqlserver
+    tier: infrastructure
 spec:
   selector:
     matchLabels:

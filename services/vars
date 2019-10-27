@@ -1,0 +1,5 @@
+DNS_SUFFIX=192.168.1.51.xip.io
+REGISTRY_SERVER=dotnetclub-docker.pkg.coding.net/dotnetconf/dev/
+ENVIRONMENT_NAME=xxx
+DEPLOY_SUFFIX=xxx
+IMAGE_VERSION=xxx
