@@ -37,5 +37,9 @@ kubectl get namespaces
 运行以下脚本，并部署你的 CI/CD 环境
 
 ```sh
-./provision-cicd.sh --suffix $(id -un)
+./provision-cicd.sh --suffix $(id -un | awk '{print tolower($0)}')
 ```
+
+## 部署微服务
+
+上面的基础环境创建完成之后，就可以开始部署微服务了，请参考 [微服务部署](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/SERVICE-DEPLOYMENT.md) 文档。
