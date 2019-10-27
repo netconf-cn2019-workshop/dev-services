@@ -153,9 +153,9 @@ data:
     
     GO
 
-    INSERT INTO [dbo].[Products] VALUES (N'胡萝卜', 15, 153)
-    INSERT INTO [dbo].[Products] VALUES (N'肉', 100, 200)
-    INSERT INTO [dbo].[Products] VALUES (N'大豆', 150, 300)
+    INSERT INTO [dbo].[Products] VALUES (N'胡萝卜', 186, 13)
+    INSERT INTO [dbo].[Products] VALUES (N'肉', 100, 80)
+    INSERT INTO [dbo].[Products] VALUES (N'大豆', 150, 30)
     GO
 
     ---
