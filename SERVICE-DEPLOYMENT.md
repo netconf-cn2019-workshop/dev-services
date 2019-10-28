@@ -56,3 +56,18 @@ kubectl delete deployments,services,configmaps -l tier=infrastructure
 # 请先切换到正确的 Kubernetes namespace 下
 kubectl delete deployments,services,configmaps,ingress -l 'tier in (backend, frontend)'
 ```
+
+### 访问微服务
+
+使用以下命令查看可用的网站入口：
+
+```sh
+kubectl get ingress
+```
+
+你应该能够获取类似下面的输出，访问 `HOSTS` 那一列的值即可访问相应的服务：
+
+```
+NAME                       HOSTS                             ADDRESS      PORTS   AGE
+ecommerce-webapp-ingress   ecommerce-user1.aks.cloudapp.cn   10.28.6.51   80      27h
+```

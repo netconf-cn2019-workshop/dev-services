@@ -1,11 +1,7 @@
 
 ## 部署 CI/CD 环境
 
-
-确保你能够运行 Shell 脚本。在 Windows 机器上，请安装并运行 [Git](http://git-scm.com)，并启动 Git Bash 命令行工具。
-
-
-**第一步，编辑变量文件**
+### 编辑变量文件
 
 找到本项目目录下的 `cicd-infra/vars` 文件，使用文本编辑器编辑其中的变量。各个变量的含义如下：
 
@@ -18,7 +14,7 @@
 
 **部署后缀**请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 的说明。
 
-**第二步，运行部署脚本**
+### 运行部署脚本
 
 部署工作坊基础环境只需要运行一个简单的脚本即可。在运行时，需要指定 `--suffix` 部署后缀的变量值。
 
@@ -28,3 +24,22 @@
 ./provision-cicd.sh --suffix <suffix>
 ```
 
+等待部署完成。
+
+### 访问相关服务
+
+使用以下命令查看可用的网站入口：
+
+```sh
+kubectl get ingress
+```
+
+你应该能够获取类似下面的输出，访问 `HOSTS` 那一列的值即可访问相应的服务：
+
+```
+NAME                HOSTS                             ADDRESS      PORTS   AGE
+gogs-ingress        gogs-user1.aks.cloudapp.cn        10.28.6.51   80      24h
+jenkins-ingress     jenkins-user1.aks.cloudapp.cn     10.28.6.51   80      24h
+nexus-ingress       nexus-user1.aks.cloudapp.cn       10.28.6.51   80      24h
+sonarqube-ingress   sonarqube-user1.aks.cloudapp.cn   10.28.6.51   80      24h
+```

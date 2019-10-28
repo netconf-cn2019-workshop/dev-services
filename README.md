@@ -41,9 +41,9 @@ kubernetes-dashboard   Active   12d
 
 | 脚本 |  内容  |
 |----|----|
-| `provision-cicd.sh` | [部署 CI/CD 持续集成和持续交付依赖的服务]((https://github.com/netconf-cn2019-workshop/dev-services/blob/master/CICD-DEPLOYMENT.md)) |
-| `provision-infra.sh` | [部署微服务基础设施，如数据库和消息队列等]((https://github.com/netconf-cn2019-workshop/dev-services/blob/master/SERVICE-DEPLOYMENT.md)) |
-| `provision-services.sh` | [部署各个微服务]((https://github.com/netconf-cn2019-workshop/dev-services/blob/master/SERVICE-DEPLOYMENT.md)) |
+| `provision-cicd.sh` | [部署 CI/CD 持续集成和持续交付依赖的服务](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/CICD-DEPLOYMENT.md) |
+| `provision-infra.sh` | [部署微服务基础设施，如数据库和消息队列等](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/SERVICE-DEPLOYMENT.md) |
+| `provision-services.sh` | [部署各个微服务](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/SERVICE-DEPLOYMENT.md) |
 
 运行这些脚本时，需要输入特定的参数。请点击链接访问具体的文档了解详情。
 
