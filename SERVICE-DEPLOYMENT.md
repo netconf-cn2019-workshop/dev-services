@@ -12,7 +12,7 @@
 * `dev` 表示开发环境，即开发人员自用的环境
 * `stage`  表示预生产环境
 
-**部署后缀**请参考 [工作坊环境部署](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 文档中的说明。
+**部署后缀**请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 的说明。
 
 
 ### 部署基础设施

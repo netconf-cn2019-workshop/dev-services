@@ -1,4 +1,4 @@
 dns_suffix=192.168.1.51.nip.io
-import_repo=https://github.com/dotnet-presentations/aspnetcore-app-workshop.git
+import_repo=https://github.com/netconf-cn2019-workshop/ECommerce.WebApp.git
 gogs_repo_name=workshop
 deploy_suffix=xxx

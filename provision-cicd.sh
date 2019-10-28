@@ -75,15 +75,26 @@ if [ -z "$PRJ_SUFFIX" ]; then
 fi
 
 
+NAMESPACES=$(kubectl get namespaces)
+
+create_ns(){
+    local NAME
+    NAME=$1
+    EXISTS=$(echo $NAMESPACES | grep $NAME)
+    if [ -z "$EXISTS" ]; then
+        kubectl create namespace $NAME || true
+    fi
+}
+
 #   jenkins: 0.5G 2G
 #   gogs: 0.5G 1G
 #   sonarqube: 1.25G 2.5G
 #   nexus: 0.5G 2Gi
 function deploy() {
-  kubectl create namespace dev-$PRJ_SUFFIX || true
-  kubectl create namespace stage-$PRJ_SUFFIX || true
-  kubectl create namespace prod-$PRJ_SUFFIX || true
-  kubectl create namespace cicd-$PRJ_SUFFIX || true
+    create_ns dev-$ARG_PROJECT_SUFFIX
+    create_ns stage-$ARG_PROJECT_SUFFIX
+    create_ns prod-$ARG_PROJECT_SUFFIX
+    create_ns cicd-$ARG_PROJECT_SUFFIX
 
   sleep 2
 

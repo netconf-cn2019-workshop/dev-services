@@ -40,6 +40,22 @@ if [ -z "$ARG_PROJECT_SUFFIX" ]; then
     exit 1
 fi
 
+NAMESPACES=$(kubectl get namespaces)
+
+create_ns(){
+    local NAME
+    NAME=$1
+    EXISTS=$(echo $NAMESPACES | grep $NAME)
+    if [ -z "$EXISTS" ]; then
+        kubectl create namespace $NAME || true
+    fi
+}
+
+create_ns dev-$ARG_PROJECT_SUFFIX
+create_ns stage-$ARG_PROJECT_SUFFIX
+create_ns prod-$ARG_PROJECT_SUFFIX
+create_ns cicd-$ARG_PROJECT_SUFFIX
+
  _SED_EXPR="s/DEPLOY_SUFFIX=.*/DEPLOY_SUFFIX=$ARG_PROJECT_SUFFIX/g"
   if [ "$(uname)" == "Darwin" ]; then
     sed -i '' $_SED_EXPR ./services/vars
