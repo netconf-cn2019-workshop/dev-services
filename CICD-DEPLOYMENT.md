@@ -8,6 +8,7 @@
 | 变量 |  描述  |  
 |----|----|
 | dns_suffix | 环境中 Ingress 使用的顶级域名 |
+| k8s_version | Kubernetes 集群的版本号，支持 `1.13.11`, `1.14.7`, `1.15.4`, `1.16.0` |
 | import_repo | 要向 gogs、Jenkins 中默认导入的 Git 项目 |
 | gogs_repo_name | 将项目导入 gogs 时，使用的名称 |
 | deploy_suffix | 本次部署后缀（不需要修改，在运行部署脚本时指定） |

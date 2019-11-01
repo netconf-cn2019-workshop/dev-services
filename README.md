@@ -3,9 +3,11 @@
 
 本工作坊需要一个运行中的 Kubernetes 环境，并要求整个集群中工作节点上至少有 8GB 可用内存。
 
-推荐使用 [Azure Kubernetes](https://azure.microsoft.com/zh-cn/services/kubernetes-service/) 服务。2019.11.10 当天在上海的工作坊现场各位参与者所用的 Kubernetes 是由世纪互联运营的 Microsoft Azure 云赞助的。
+推荐使用 [Azure Kubernetes](https://azure.microsoft.com/zh-cn/services/kubernetes-service/) 服务。2019.11.10 当天在上海的工作坊现场各位参与者所用的 Kubernetes 是[由世纪互联运营的 Microsoft Azure 云](https://www.azure.cn/home/features/kubernetes-service)赞助的。
 
-你也可以使用 [Minikube](https://minikube.sigs.k8s.io/) 在自己的电脑上运行一个 Minikube 环境。
+你也可以使用 [Minikube](https://minikube.sigs.k8s.io/) 在自己的电脑上运行一个小型的 Kubernetes 环境。
+
+请确保你的集群的版本号是下列版本之一：`1.13.11`, `1.14.7`, `1.15.4`, `1.16.0`。
 
 ### 确保登录到 Kubernetes 环境
 
