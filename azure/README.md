@@ -1,5 +1,13 @@
 
 
+# 在 Azure 环境运行工作坊
+
+首先，请根据[官方文档](https://docs.azure.cn/zh-cn/aks/)创建你的集群。
+
+下面的内容适用于你已经成功完成了集群的创建的后续操作。完成下述各步骤之后，即可继续按照工作坊 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 的说明继续操作。
+
+ 
+
 ## 安装 Azure 命令行工具
 
 请根据 Azure CLI 的文档安装 [Azure 命令行工具](https://docs.azure.cn/zh-cn/cli/index)。
@@ -53,17 +61,19 @@ kubectl config set-context $(kubectl config current-context) --namespace "ingres
 kubectl apply -f ./ingress
 ```
 
-安装完毕后，使用以下命令获取你的公网 IP：
+安装完毕后，使用以下命令获取 Ingress 的公网 IP：
 
 ```
 kubectl rollout status deployments/nginx-ingress-controller
 kubectl get service/ingress-nginx --namespace ingress-nginx --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
+获得了 Ingress 的公网 IP 之后，请手动设置泛域名（例如 `workshop.dotnetconf.cn`）解析到该 IP。后续部署 CI/CD 环境或者部署微服务时，请将该泛域名作为 `dns_suffix` 变量的值设置到变量文件中。
+
 如果发现 `deployments/nginx-ingress-controller` 迟迟不能完成，请使用 `kubectl get pods` 查看 Pod 运行状态，并配合使用 `kubectl describe pod/<pod-id>` 和 `kubectl logs pod/<pod-id>` 来了解部署失败的原因。
 
 
-## 访问 Dashboard
+## 访问 Dashboard（可选）
 
 Azure aks 环境默认已经启用了 Dashboard。首次使用之前，需要为 `kubernetes-dashboard` 用户赋予集群管理员的角色。
 
