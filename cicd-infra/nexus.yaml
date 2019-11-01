@@ -88,7 +88,7 @@ spec:
 
 ---
 
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: $$ingress_apiversion
 kind: Ingress
 metadata:
   name: nexus-ingress
