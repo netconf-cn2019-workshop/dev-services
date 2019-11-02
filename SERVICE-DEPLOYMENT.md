@@ -14,19 +14,6 @@
 
 **部署后缀**请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 的说明。
 
-### 编辑变量文件
-
-找到本项目目录下的 `services/vars` 文件，使用文本编辑器编辑其中的变量。各个变量的含义如下：
-
-| 变量 |  描述  |  
-|----|----|
-| DNS_SUFFIX | 环境中 Ingress 使用的顶级域名 |
-| INGRESS_APIVERSION | Ingress 的 apiVersion 值。如果 Kubernetes 集群版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
-| REGISTRY_SERVER | 存储了微服务的容器镜像注册表（registry）位置 |
-| ENVIRONMENT_NAME | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署的目标环境名称。支持 `dev`，`stage`，`prod` |
-| DEPLOY_SUFFIX | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署后缀。关于此参数的更多说明，请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) |
-| IMAGE_VERSION | （无需手动修改，由 `service-list` 文件指定后，此值会自动更新）本次部署的各微服务的镜像版本 |
-
 ### 部署基础设施
 
 针对每一个环境，比如 `dev` 或者 `stage`，只需要部署一次基础设施。之后，多次部署微服务时，可持续使用这些基础设施。
@@ -50,13 +37,26 @@ kubectl delete deployments,services,configmaps -l tier=infrastructure
 
 部署步骤是：
 
-1. 如果在现场参与工作坊，请跳过这一步。手动编辑 `services/vars` 文件，将 `DNS_SUFFIX` 变量的值改成你的环境中的 Ingress 的域名后缀。
+1. 编辑变量文件
+2. 执行部署命令行
 
-2. 手动编辑 `services/vars` 文件，请更改 `REGISTRY_SERVER` 变量为你存储微服务的镜像容器注册表（Image Registry）的位置。
 
-3. 手动编辑 `services/service-list` 文件，将其中每行的最后一项（按冒号 `:` 分隔），改为你希望部署的镜像的版本号。
+#### 编辑变量文件
 
-4. 回到上级目录，执行以下命令行，完成服务的部署：
+找到项目目录下的 `services/vars` 文件，使用文本编辑器编辑其中的变量。各个变量的含义如下：
+
+| 变量 |  描述  |  
+|----|----|
+| DNS_SUFFIX | 环境中 Ingress 使用的顶级域名 |
+| INGRESS_APIVERSION | Ingress 的 apiVersion 值。如果 Kubernetes 集群版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
+| REGISTRY_SERVER | 存储了微服务的容器镜像注册表（registry）位置 |
+| ENVIRONMENT_NAME | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署的目标环境名称。支持 `dev`，`stage`，`prod` |
+| DEPLOY_SUFFIX | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署后缀。关于此参数的更多说明，请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) |
+| IMAGE_VERSION | （无需手动修改，由 `service-list` 文件指定后，此值会自动更新）本次部署的各微服务的镜像版本 |
+
+找到项目目录下的 `services/service-list` 文件，将其中每行的最后一项（按冒号 `:` 分隔），改为你希望部署的镜像的版本号。
+
+#### 执行部署命令行
 
 ```sh
 ./provision-services.sh --env <env> --suffix <suffix>
@@ -66,6 +66,7 @@ kubectl delete deployments,services,configmaps -l tier=infrastructure
 
 ```
 # 请先切换到正确的 Kubernetes namespace 下
+# kubectl config set-context $(kubectl config current-context) --namespace "<env>-<suffix>"
 kubectl delete deployments,services,configmaps,ingress -l 'tier in (backend, frontend)'
 ```
 
