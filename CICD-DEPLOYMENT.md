@@ -1,5 +1,5 @@
 
-## 部署 CI/CD 环境
+# 部署 CI/CD 环境
 
 ### 编辑变量文件
 
@@ -9,12 +9,11 @@
 |----|----|
 | dns_suffix | 环境中 Ingress 使用的顶级域名 |
 | k8s_version | Kubernetes 集群的版本号，支持 `1.13.11`, `1.14.7`, `1.15.4`, `1.16.0` |
-| ingress_apiversion | Ingress 的 apiVersion 值。如果 kubectl 版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
+| ingress_apiversion | Ingress 的 apiVersion 值。如果 Kubernetes 集群版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
 | import_repo | 要向 gogs、Jenkins 中默认导入的 Git 项目 |
 | gogs_repo_name | 将项目导入 gogs 时，使用的名称 |
-| deploy_suffix | 本次部署后缀（不需要修改，在运行部署脚本时指定） |
+| deploy_suffix | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署后缀。关于此参数的更多说明，请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md)  |
 
-**部署后缀**请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 的说明。
 
 ### 运行部署脚本
 

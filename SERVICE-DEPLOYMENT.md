@@ -1,10 +1,10 @@
 
 
-## 部署微服务
+# 部署微服务
 
 在每一套环境中，部署微服务都分为两个步骤，即部署基础设施和微服务本身。基础设施指的是微服务运行期间所需的数据库、缓存等服务。
 
-当针对某一个特定的环境部署时，需要输入以下两个参数：
+当针对某一个特定的环境部署时，在后面的命令行参数中需要输入以下两个参数：
 1. 环境名称（`--env`）
 2. 部署后缀（`--suffix`）
 
@@ -14,6 +14,18 @@
 
 **部署后缀**请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) 的说明。
 
+### 编辑变量文件
+
+找到本项目目录下的 `services/vars` 文件，使用文本编辑器编辑其中的变量。各个变量的含义如下：
+
+| 变量 |  描述  |  
+|----|----|
+| DNS_SUFFIX | 环境中 Ingress 使用的顶级域名 |
+| INGRESS_APIVERSION | Ingress 的 apiVersion 值。如果 Kubernetes 集群版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
+| REGISTRY_SERVER | 存储了微服务的容器镜像注册表（registry）位置 |
+| ENVIRONMENT_NAME | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署的目标环境名称。支持 `dev`，`stage`，`prod` |
+| DEPLOY_SUFFIX | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署后缀。关于此参数的更多说明，请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md) |
+| IMAGE_VERSION | （无需手动修改，由 `service-list` 文件指定后，此值会自动更新）本次部署的各微服务的镜像版本 |
 
 ### 部署基础设施
 
