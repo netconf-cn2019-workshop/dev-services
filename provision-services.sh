@@ -56,7 +56,7 @@ create_ns stage-$ARG_PROJECT_SUFFIX
 create_ns prod-$ARG_PROJECT_SUFFIX
 create_ns cicd-$ARG_PROJECT_SUFFIX
 
- _SED_EXPR="s/DEPLOY_SUFFIX=.*/DEPLOY_SUFFIX=$ARG_PROJECT_SUFFIX/g"
+ _SED_EXPR="s/DEPLOY_SUFFIX=.*/DEPLOY_SUFFIX=$ARG_ENV-$ARG_PROJECT_SUFFIX/g"
   if [ "$(uname)" == "Darwin" ]; then
     sed -i '' $_SED_EXPR ./services/vars
   else
