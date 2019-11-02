@@ -281,13 +281,13 @@ data:
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                   <name>docker</name>
-                  <image>dockerhub.azk8s.cn/library/docker:latest</image>
+                  <image>dockerhub.azk8s.cn/library/docker:dind</image>
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
                   <workingDir>/home/jenkins/agent</workingDir>
-                  <command></command>
+                  <command>cat</command>
                   <args>${computer.jnlpmac} ${computer.name}</args>
-                  <ttyEnabled>false</ttyEnabled>
+                  <ttyEnabled>true</ttyEnabled>
                   # Resources configuration is a little hacky. This was to prevent breaking
                   # changes, and should be cleanned up in the future once everybody had
                   # enough time to migrate.
@@ -351,7 +351,21 @@ data:
         <excludeClientIPFromCrumb>true</excludeClientIPFromCrumb>
       </crumbIssuer>
       <nodeProperties/>
-      <globalNodeProperties/>
+      <globalNodeProperties>
+        <hudson.slaves.EnvironmentVariablesNodeProperty>
+          <envVars serialization="custom">
+            <unserializable-parents/>
+            <tree-map>
+              <default>
+                <comparator class="hudson.util.CaseInsensitiveComparator"/>
+              </default>
+              <int>1</int>
+              <string>DEPLOY_SUFFIX</string>
+              <string>$$deploy_suffix</string>
+            </tree-map>
+          </envVars>
+        </hudson.slaves.EnvironmentVariablesNodeProperty>
+      </globalNodeProperties>
       <noUsageStatistics>true</noUsageStatistics>
     </hudson>
 
@@ -367,6 +381,27 @@ data:
       <pendingSignatures/>
       <pendingClasspathEntries/>
     </scriptApproval>
+
+  credentials.xml: |-
+    <?xml version='1.1' encoding='UTF-8'?>
+    <com.cloudbees.plugins.credentials.SystemCredentialsProvider plugin="credentials@2.3.0">
+      <domainCredentialsMap class="hudson.util.CopyOnWriteMap$Hash">
+        <entry>
+          <com.cloudbees.plugins.credentials.domains.Domain>
+            <specifications/>
+          </com.cloudbees.plugins.credentials.domains.Domain>
+          <java.util.concurrent.CopyOnWriteArrayList>
+            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+              <scope>GLOBAL</scope>
+              <id>dockerRegistryCredential</id>
+              <description>docker registry credential</description>
+              <username>dev-1572058038532</username>
+              <password>your-password-here</password>
+            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
+          </java.util.concurrent.CopyOnWriteArrayList>
+        </entry>
+      </domainCredentialsMap>
+    </com.cloudbees.plugins.credentials.SystemCredentialsProvider>
 
   jenkins.model.JenkinsLocationConfiguration.xml: |-
     <?xml version='1.1' encoding='UTF-8'?>
@@ -387,6 +422,7 @@ data:
     echo "false" > /usr/share/jenkins/ref/secrets/slave-to-master-security-kill-switch;
     cp /var/jenkins_config/config.xml /var/jenkins_home;
     cp /var/jenkins_config/scriptapproval.xml /var/jenkins_home/
+    cp /var/jenkins_config/credentials.xml /var/jenkins_home/
     cp /var/jenkins_config/jenkins.model.JenkinsLocationConfiguration.xml /var/jenkins_home;
 
     # remove all plugins from shared volume
