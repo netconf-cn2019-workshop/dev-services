@@ -216,12 +216,17 @@ data:
                       <key>DEPLOY_SUFFIX</key>
                       <value>$$deploy_suffix</value>
                     </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>DNS_SUFFIX</key>
+                      <value>$$dns_suffix</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                   </envVars>
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
               </containers>
               <annotations/>
               <imagePullSecrets/>
               <nodeProperties/>
+              <showRawYaml>false</showRawYaml>
               <podRetention class="org.csanchez.jenkins.plugins.kubernetes.pod.retention.Default"/>
             </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
             <org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
@@ -277,6 +282,10 @@ data:
                       <key>DEPLOY_SUFFIX</key>
                       <value>$$deploy_suffix</value>
                     </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>DNS_SUFFIX</key>
+                      <value>$$dns_suffix</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                   </envVars>
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
@@ -285,9 +294,9 @@ data:
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
                   <workingDir>/home/jenkins/agent</workingDir>
-                  <command>cat</command>
-                  <args></args>
-                  <ttyEnabled>true</ttyEnabled>
+                  <command>sleep</command>
+                  <args>86400</args>
+                  <ttyEnabled>false</ttyEnabled>
                   # Resources configuration is a little hacky. This was to prevent breaking
                   # changes, and should be cleanned up in the future once everybody had
                   # enough time to migrate.
@@ -312,12 +321,17 @@ data:
                       <key>DEPLOY_SUFFIX</key>
                       <value>$$deploy_suffix</value>
                     </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                    <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
+                      <key>DNS_SUFFIX</key>
+                      <value>$$dns_suffix</value>
+                    </org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                   </envVars>
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
               </containers>
               <annotations/>
               <imagePullSecrets/>
               <nodeProperties/>
+              <showRawYaml>false</showRawYaml>
               <podRetention class="org.csanchez.jenkins.plugins.kubernetes.pod.retention.Default"/>
             </org.csanchez.jenkins.plugins.kubernetes.PodTemplate>
           </templates>
@@ -359,9 +373,11 @@ data:
               <default>
                 <comparator class="hudson.util.CaseInsensitiveComparator"/>
               </default>
-              <int>1</int>
+              <int>2</int>
               <string>DEPLOY_SUFFIX</string>
               <string>$$deploy_suffix</string>
+              <string>DNS_SUFFIX</string>
+              <string>$$dns_suffix</string>
             </tree-map>
           </envVars>
         </hudson.slaves.EnvironmentVariablesNodeProperty>
