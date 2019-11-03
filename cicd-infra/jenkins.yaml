@@ -281,20 +281,20 @@ data:
                 </org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                 <org.csanchez.jenkins.plugins.kubernetes.ContainerTemplate>
                   <name>docker</name>
-                  <image>dockerhub.azk8s.cn/library/docker:dind</image>
+                  <image>dockerhub.azk8s.cn/jijiechen/kubectl:$$k8s_version</image>
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
                   <workingDir>/home/jenkins/agent</workingDir>
                   <command>cat</command>
-                  <args>${computer.jnlpmac} ${computer.name}</args>
+                  <args></args>
                   <ttyEnabled>true</ttyEnabled>
                   # Resources configuration is a little hacky. This was to prevent breaking
                   # changes, and should be cleanned up in the future once everybody had
                   # enough time to migrate.
                   <resourceRequestCpu>512m</resourceRequestCpu>
-                  <resourceRequestMemory>512Mi</resourceRequestMemory>
+                  <resourceRequestMemory>256Mi</resourceRequestMemory>
                   <resourceLimitCpu>512m</resourceLimitCpu>
-                  <resourceLimitMemory>1024Mi</resourceLimitMemory>
+                  <resourceLimitMemory>512Mi</resourceLimitMemory>
                   <envVars>
                     <org.csanchez.jenkins.plugins.kubernetes.ContainerEnvVar>
                       <key>JENKINS_URL</key>
