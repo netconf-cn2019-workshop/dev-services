@@ -65,27 +65,35 @@ data:
 
       sleep 5
 
-      cat <<EOF > /tmp/data.json
+      function migrate_repo(){
+        local _REMOTE_REPO=$1
+        local _GOGS_REPO_NAME="${${_REMOTE_REPO##*/}%.git}"
+        cat <<EOF > /tmp/data.json
       {
-      "clone_addr": "$$import_repo",
+      "clone_addr": "$_REMOTE_REPO",
       "uid": 1,
-      "repo_name": "$$gogs_repo_name"
+      "repo_name": "$_GOGS_REPO_NAME"
       }
       EOF
 
-      _RETURN=$(curl -sL -w "%{http_code}" http://gogs:3000/$GOGS_USER/$$gogs_repo_name -o /dev/null)
-      if [ $_RETURN == "404" ] ;then
+        local _RETURN=$(curl -sL -w "%{http_code}" http://gogs:3000/$GOGS_USER/$_GOGS_REPO_NAME -o /dev/null)
+        if [ $_RETURN == "404" ] ;then
         _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
         -u $GOGS_USER:$GOGS_PWD -X POST http://gogs:3000/api/v1/repos/migrate -d @/tmp/data.json)
 
-        if [ $_RETURN != "201" ] ;then
-          echo "ERROR: Failed to import repo $$import_repo"
-          cat /tmp/curl.log
-          exit 255
+            if [ $_RETURN != "201" ] ;then
+                echo "ERROR: Failed to import repo $_REMOTE_REPO"
+                cat /tmp/curl.log
+                sleep 3
+            fi
         fi
-      fi
+      }
 
-
+      # migrate_repo
+      for p in "dev-services" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do 
+        migrate_repo https://github.com/netconf-cn2019-workshop/$_p.git 
+        sleep 3
+      done
 
       function disable_outreach() {
         local _NEXUS_USER=$1

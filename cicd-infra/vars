@@ -1,6 +1,4 @@
 dns_suffix=workshop.jijiechen.com
 k8s_version=1.14.7
 ingress_apiversion=networking.k8s.io/v1beta1
-import_repo=https://github.com/netconf-cn2019-workshop/ECommerce.WebApp.git
-gogs_repo_name=workshop
 deploy_suffix=xxx
