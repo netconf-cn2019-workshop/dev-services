@@ -339,9 +339,6 @@ data:
       <primaryView>All</primaryView>
       <slaveAgentPort>50000</slaveAgentPort>
       <label></label>
-      <crumbIssuer class="hudson.security.csrf.DefaultCrumbIssuer">
-        <excludeClientIPFromCrumb>true</excludeClientIPFromCrumb>
-      </crumbIssuer>
       <nodeProperties/>
       <globalNodeProperties>
         <hudson.slaves.EnvironmentVariablesNodeProperty>
@@ -432,49 +429,51 @@ data:
     # Create jobs
     for job in $(ls /var/jenkins_jobs); do
       mkdir -p /var/jenkins_home/jobs/$job
-      yes | cp -i /var/jenkins_jobs/$job /var/jenkins_home/jobs/$job/config.xml
+      cp /var/jenkins_jobs/$job /var/jenkins_home/jobs/$job/config.xml
     done
 
-    PROJECTS=("ECommerce.Catalog.Api" "ECommerce.Customers.Api" "ECommerce.Payment.Host" "ECommerce.Reporting.Api" "ECommerce.Sales.Api" "ECommerce.Shipping.Host" "ECommerce.WebApp")
-    
-    for PROJ in $PROJECTS ; do
-    mkdir -p /var/jenkins_home/jobs/$PROJ
-    JOB_XML= $(cat << EOF
+    function create_project(){
+        local PROJ=$1
+    cat << EOF
     <?xml version='1.1' encoding='UTF-8'?>
     <flow-definition plugin="workflow-job@2.35">
-      <actions/>
-      <description></description>
-      <keepDependencies>false</keepDependencies>
-      <properties/>
-      <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.75">
+        <actions/>
+        <description></description>
+        <keepDependencies>false</keepDependencies>
+        <properties/>
+        <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.75">
         <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
-          <configVersion>2</configVersion>
-          <userRemoteConfigs>
+            <configVersion>2</configVersion>
+            <userRemoteConfigs>
             <hudson.plugins.git.UserRemoteConfig>
-              <url>http://gogs/gogs/$PROJ.git</url>
+                <url>http://gogs:3000/gogs/$PROJ.git</url>
             </hudson.plugins.git.UserRemoteConfig>
-          </userRemoteConfigs>
-          <branches>
+            </userRemoteConfigs>
+            <branches>
             <hudson.plugins.git.BranchSpec>
-              <name>*/master</name>
+                <name>*/master</name>
             </hudson.plugins.git.BranchSpec>
-          </branches>
-          <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
-          <submoduleCfg class="list"/>
-          <extensions/>
+            </branches>
+            <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+            <submoduleCfg class="list"/>
+            <extensions/>
         </scm>
         <scriptPath>Jenkinsfile</scriptPath>
         <lightweight>true</lightweight>
-      </definition>
-      <triggers/>
-      <authToken>iDbVmjoqgBXe</authToken>
-      <disabled>false</disabled>
+        </definition>
+        <triggers/>
+        <authToken>iDbVmjoqgBXe</authToken>
+        <disabled>false</disabled>
     </flow-definition>
     EOF
-    )
-        echo $JOB_XML > /var/jenkins_home/jobs/$PROJ/config.xml
-    done
+    }
 
+    PROJECTS=("ECommerce.Catalog.Api" "ECommerce.Customers.Api" "ECommerce.Payment.Host" "ECommerce.Reporting.Api" "ECommerce.Sales.Api" "ECommerce.Shipping.Host" "ECommerce.WebApp");
+
+    for PROJ in ${PROJECTS[@]} ; do
+        mkdir -p /var/jenkins_home/jobs/$PROJ
+        echo $(create_project $PROJ) > /var/jenkins_home/jobs/$PROJ/config.xml
+    done
 
 
 ---
@@ -501,7 +500,7 @@ spec:
       initContainers:
         - name: installer
           image: dockerhub.azk8s.cn/jenkins/jenkins:2.190.1
-          command: [ "sh", "/var/jenkins_config/apply_config.sh" ]
+          command: [ "bash", "/var/jenkins_config/apply_config.sh" ]
           env:            
             - name: JENKINS_UC
               value: https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.190/update-center.json

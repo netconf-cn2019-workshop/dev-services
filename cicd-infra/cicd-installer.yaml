@@ -44,7 +44,7 @@ data:
 
       kubectl rollout status deployment/gogs
 
-      sleep 5
+      sleep 15
       
       GOGS_USER=gogs
       GOGS_PWD=gogs
@@ -55,19 +55,18 @@ data:
       --form retype=$GOGS_PWD \
       --form email=gogs@gogs.com)
 
-      sleep 5
-
       if [ $_RETURN != "200" ] && [ $_RETURN != "302" ] ; then
-      echo "ERROR: Failed to create default Gogs user 'gogs'"
-      cat /tmp/curl.log
-      exit 255
+        echo "ERROR: Failed to create default Gogs user 'gogs'"
+        cat /tmp/curl.log
+        exit 255
       fi
 
       sleep 5
 
       function migrate_repo(){
         local _REMOTE_REPO=$1
-        local _GOGS_REPO_NAME="${${_REMOTE_REPO##*/}%.git}"
+        local _NAME_SUFFIX="${_REMOTE_REPO##*/}"
+        local _GOGS_REPO_NAME="${_NAME_SUFFIX%.git}"
         cat <<EOF > /tmp/data.json
       {
       "clone_addr": "$_REMOTE_REPO",
@@ -84,7 +83,6 @@ data:
             if [ $_RETURN != "201" ] ;then
                 echo "ERROR: Failed to import repo $_REMOTE_REPO"
                 cat /tmp/curl.log
-                sleep 3
             fi
         fi
       }
