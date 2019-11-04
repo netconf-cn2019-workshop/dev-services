@@ -14,6 +14,10 @@ kubectl create -n dev-$USERNAME rolebinding $USERNAME-admin --clusterrole=admin 
 kubectl create -n stage-$USERNAME rolebinding $USERNAME-admin --clusterrole=admin --serviceaccount default:$USERNAME
 kubectl create -n prod-$USERNAME rolebinding $USERNAME-admin --clusterrole=admin --serviceaccount default:$USERNAME
 
+kubectl create -n dev-$USERNAME rolebinding jenkins-deploy --clusterrole=admin --serviceaccount cicd-$USERNAME:jenkins
+kubectl create -n stage-$USERNAME rolebinding jenkins-deploy --clusterrole=admin --serviceaccount cicd-$USERNAME:jenkins
+kubectl create -n prod-$USERNAME rolebinding jenkins-deploy --clusterrole=admin --serviceaccount cicd-$USERNAME:jenkins
+
 
 TOKEN=$(kubectl get -n default secret $(kubectl get -n default serviceaccount $USERNAME -o jsonpath='{.secrets[].name}') -o go-template='{{.data.token | base64decode}}' && echo)
 CA_DATA=$(cat ~/.kube/config | grep certificate-authority-data | cut -d ':' -f 2)
