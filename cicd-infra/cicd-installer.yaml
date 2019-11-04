@@ -89,10 +89,39 @@ data:
         fi
       }
 
+      function add_web_hook(){
+        local PROJ=$1
+          cat <<EOF > /tmp/data.json
+      {
+          "type": "gogs",
+          "config": {
+          "url": "http://jenkins/job/$PROJ/build?token=iDbVmjoqgBXe",
+          "content_type": "json"
+          },
+          "events": [
+          "push"
+          ],
+          "active": true
+      }
+      EOF
+
+          local _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" -H "Content-Type: application/json" \
+          -u $GOGS_USER:$GOGS_PWD -X POST http://gogs:3000/api/v1/repos/gogs/$PROJ/hooks -d @/tmp/data.json)
+
+          if [ $_RETURN != "201" ] ; then
+              echo "ERROR: Failed to set webhook for project $PROJ"
+              cat /tmp/curl.log
+          fi
+      }
+
       # migrate_repo
       for p in "dev-services" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do 
-        migrate_repo https://github.com/netconf-cn2019-workshop/$_p.git 
+        migrate_repo https://github.com/netconf-cn2019-workshop/$p.git 
         sleep 3
+        if [ "$p" != "ECommerce.WebApp" ] && [ "$p" != "ECommerce.Services.Common" ] && [ "$p" != "ECommerce.Common" ]; then
+          add_web_hook $p
+          sleep 2
+        fi
       done
 
       function disable_outreach() {
