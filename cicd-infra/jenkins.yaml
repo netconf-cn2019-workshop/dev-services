@@ -113,6 +113,8 @@ data:
       <buildWrappers/>
     </project>
 
+
+
 ---
 
 apiVersion: v1
@@ -270,9 +272,9 @@ data:
                   <privileged>true</privileged>
                   <alwaysPullImage>false</alwaysPullImage>
                   <workingDir>/home/jenkins/agent</workingDir>
-                  <command>sleep</command>
-                  <args>86400</args>
-                  <ttyEnabled>false</ttyEnabled>
+                  <command>cat</command>
+                  <args></args>
+                  <ttyEnabled>true</ttyEnabled>
                   # Resources configuration is a little hacky. This was to prevent breaking
                   # changes, and should be cleanned up in the future once everybody had
                   # enough time to migrate.
@@ -432,6 +434,47 @@ data:
       mkdir -p /var/jenkins_home/jobs/$job
       yes | cp -i /var/jenkins_jobs/$job /var/jenkins_home/jobs/$job/config.xml
     done
+
+    PROJECTS=("ECommerce.Catalog.Api" "ECommerce.Customers.Api" "ECommerce.Payment.Host" "ECommerce.Reporting.Api" "ECommerce.Sales.Api" "ECommerce.Shipping.Host" "ECommerce.WebApp")
+    
+    for PROJ in $PROJECTS ; do
+    mkdir -p /var/jenkins_home/jobs/$PROJ
+    JOB_XML= $(cat << EOF
+    <?xml version='1.1' encoding='UTF-8'?>
+    <flow-definition plugin="workflow-job@2.35">
+      <actions/>
+      <description></description>
+      <keepDependencies>false</keepDependencies>
+      <properties/>
+      <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.75">
+        <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
+          <configVersion>2</configVersion>
+          <userRemoteConfigs>
+            <hudson.plugins.git.UserRemoteConfig>
+              <url>http://gogs/gogs/$PROJ.git</url>
+            </hudson.plugins.git.UserRemoteConfig>
+          </userRemoteConfigs>
+          <branches>
+            <hudson.plugins.git.BranchSpec>
+              <name>*/master</name>
+            </hudson.plugins.git.BranchSpec>
+          </branches>
+          <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+          <submoduleCfg class="list"/>
+          <extensions/>
+        </scm>
+        <scriptPath>Jenkinsfile</scriptPath>
+        <lightweight>true</lightweight>
+      </definition>
+      <triggers/>
+      <authToken>iDbVmjoqgBXe</authToken>
+      <disabled>false</disabled>
+    </flow-definition>
+    EOF
+    )
+        echo $JOB_XML > /var/jenkins_home/jobs/$PROJ/config.xml
+    done
+
 
 
 ---
