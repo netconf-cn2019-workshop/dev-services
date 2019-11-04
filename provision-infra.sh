@@ -64,4 +64,4 @@ kubectl rollout status deployment/sqlserver
 sleep 5
 
 __SQLSERVER_POD=$(kubectl get pods -l app=sqlserver -o=jsonpath='{.items[*].metadata.name}')
-kubectl exec $__SQLSERVER_POD -- /bin/bash -c '/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i /var/init-script/init-schema.sql'
+MSYS_NO_PATHCONV=1 kubectl exec $__SQLSERVER_POD -- /bin/bash -c '/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i /var/init-script/init-schema.sql'
