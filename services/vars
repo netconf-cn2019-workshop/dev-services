@@ -1,6 +1,6 @@
 DNS_SUFFIX=workshop.jijiechen.com
 INGRESS_APIVERSION=networking.k8s.io/v1beta1
 REGISTRY_SERVER=dotnetclub-docker.pkg.coding.net/dotnetconf/dev/
-ENVIRONMENT_NAME=xxx
-DEPLOY_SUFFIX=xxx
-IMAGE_VERSION=xxx
+ENVIRONMENT_NAME=please_dont_change
+DEPLOY_SUFFIX=please_dont_change
+IMAGE_VERSION=please_dont_change

@@ -372,27 +372,27 @@ data:
       <pendingSignatures/>
       <pendingClasspathEntries/>
     </scriptApproval>
+  
+  create-docker-registry-credential.groovy: |-
+    import com.cloudbees.plugins.credentials.impl.*;
+    import com.cloudbees.plugins.credentials.*;
+    import com.cloudbees.plugins.credentials.domains.*;
 
-  credentials.xml: |-
-    <?xml version='1.1' encoding='UTF-8'?>
-    <com.cloudbees.plugins.credentials.SystemCredentialsProvider plugin="credentials@2.3.0">
-      <domainCredentialsMap class="hudson.util.CopyOnWriteMap$Hash">
-        <entry>
-          <com.cloudbees.plugins.credentials.domains.Domain>
-            <specifications/>
-          </com.cloudbees.plugins.credentials.domains.Domain>
-          <java.util.concurrent.CopyOnWriteArrayList>
-            <com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
-              <scope>GLOBAL</scope>
-              <id>dockerRegistryCredential</id>
-              <description>docker registry credential</description>
-              <username>dev-1572058038532</username>
-              <password>your-password-here</password>
-            </com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>
-          </java.util.concurrent.CopyOnWriteArrayList>
-        </entry>
-      </domainCredentialsMap>
-    </com.cloudbees.plugins.credentials.SystemCredentialsProvider>
+    def credId        = "dockerRegistryCredential"
+    def username      = "$$docker_registry_username"
+    def password      = "$$docker_registry_password"
+    def description   = "image push credential"
+
+    credential = (Credentials) new UsernamePasswordCredentialsImpl(
+        CredentialsScope.GLOBAL,  // Scope
+        credId,                   // id
+        description,              // description
+        username,                 // username
+        password                  // password
+    )
+
+    SystemCredentialsProvider.getInstance().getStore().addCredentials(Domain.global(), credential)
+
 
   jenkins.model.JenkinsLocationConfiguration.xml: |-
     <?xml version='1.1' encoding='UTF-8'?>
@@ -409,12 +409,14 @@ data:
     kubernetes:1.20.0
 
   apply_config.sh: |-
-    mkdir -p /usr/share/jenkins/ref/secrets/;
-    echo "false" > /usr/share/jenkins/ref/secrets/slave-to-master-security-kill-switch;
-    cp /var/jenkins_config/config.xml /var/jenkins_home;
+    mkdir -p /usr/share/jenkins/ref/secrets/
+    echo "false" > /usr/share/jenkins/ref/secrets/slave-to-master-security-kill-switch
+    cp /var/jenkins_config/config.xml /var/jenkins_home/
     cp /var/jenkins_config/scriptapproval.xml /var/jenkins_home/
-    cp /var/jenkins_config/credentials.xml /var/jenkins_home/
-    cp /var/jenkins_config/jenkins.model.JenkinsLocationConfiguration.xml /var/jenkins_home;
+    cp /var/jenkins_config/jenkins.model.JenkinsLocationConfiguration.xml /var/jenkins_home/
+
+    mkdir /var/jenkins_home/init.groovy.d
+    cp /var/jenkins_config/create-docker-registry-credential.groovy /var/jenkins_home/init.groovy.d/
 
     # remove all plugins from shared volume
     # rm -rf /var/jenkins_home/plugins/*

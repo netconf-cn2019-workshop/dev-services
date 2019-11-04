@@ -1,4 +1,6 @@
 dns_suffix=workshop.jijiechen.com
 k8s_version=1.14.7
 ingress_apiversion=networking.k8s.io/v1beta1
-deploy_suffix=xxx
+docker_registry_username=please_change
+docker_registry_password=please_change
+deploy_suffix=please_dont_change
