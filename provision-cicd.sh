@@ -124,10 +124,9 @@ function deploy() {
 
   echo "Wait for installing..."
   sleep 3
-  kubectl get job/cicd-installer -o=jsonpath='{.status}' --watch --watch-only
-  
+  kubectl wait --for=condition=complete --timeout=900s job/cicd-installer
+
   kubectl logs pods/$(kubectl get pods -o=jsonpath='{.items[0].metadata.name}' -l job-name=cicd-installer)
-  echo "Installation completed."
 }
 
 function kcd() {

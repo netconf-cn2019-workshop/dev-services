@@ -42,14 +42,15 @@ data:
       kubectl config use-context kube
       kubectl config set-context $(kubectl config current-context) --namespace $(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
 
+      kubectl rollout status deployment/gogs-postgresql
       kubectl rollout status deployment/gogs
 
-      sleep 15
+      sleep 5
       
       GOGS_USER=gogs
       GOGS_PWD=gogs
 
-      _RETURN=$(curl -o /tmp/curl.log -sL --post302 -w "%{http_code}" http://gogs:3000/user/sign_up \
+      _RETURN=$(curl -o /tmp/curl.log -sL -w "%{http_code}" http://gogs:3000/user/sign_up \
       --form user_name=$GOGS_USER \
       --form password=$GOGS_PWD \
       --form retype=$GOGS_PWD \
@@ -61,7 +62,7 @@ data:
         exit 255
       fi
 
-      sleep 5
+      sleep 3
 
       function migrate_repo(){
         local _REMOTE_REPO=$1
@@ -115,7 +116,7 @@ data:
       # migrate_repo
       for p in "dev-services" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do 
         migrate_repo https://github.com/netconf-cn2019-workshop/$p.git 
-        sleep 3
+        sleep 2
         if [ "$p" != "ECommerce.WebApp" ] && [ "$p" != "ECommerce.Services.Common" ] && [ "$p" != "ECommerce.Common" ]; then
           add_web_hook $p
           sleep 2
@@ -162,7 +163,7 @@ data:
       disable_outreach admin admin123 'http://nexus:8081'
       change_admin_password admin admin123 'http://nexus:8081'
 
-      echo 'Installation has completed successfully.'
+      echo -e "\e[1;32mInstallation has completed successfully.\e[0m"
 
 
 ---
@@ -188,7 +189,7 @@ spec:
             - name: init-script
               mountPath: /var/init-script
           command:
-            - /bin/sh
+            - /bin/bash
             - /var/init-script/init.sh
       volumes:
         - name: init-script
