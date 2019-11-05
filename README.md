@@ -16,9 +16,17 @@
 
 其余操作，请按工作坊说明正常执行即可。
 
+### 讲师和学员指南
+
+给参与工作坊的学员的准备工作的指南，请[参考此文档](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/attendees/GETTING-READY.md)。
+
+给讲师在 Azure 上创建用于运行此工作坊的指南，请[参考此文档](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/azure/INSTALLATION.md)。
+
+  
+
 ### 确保登录到 Kubernetes 环境
 
-在有了 Kubernetes 集群之后，请在本地电脑上安装 kubectl 命令行工具。安装完成之后，打开一个命令行窗口（PowerShell 或 Bash），执行以下命令，以确保你的 `kubectl` 命令安装正确：
+在有了 Kubernetes 集群之后，请在本地电脑上安装 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 命令行工具。安装完成之后，打开一个命令行窗口（PowerShell 或 Bash），执行以下命令，以确保你的 `kubectl` 命令安装正确：
 
 ```sh
 kubectl cluster-info
@@ -41,8 +49,7 @@ kube-system            Active   12d
 kubernetes-dashboard   Active   12d
 ```
 
-
-## 部署工作坊环境
+### 部署工作坊环境
 
 请先确保你能够运行 Shell 脚本。在 Windows 机器上，请安装并运行 [Git](http://git-scm.com)，并启动 Git Bash 命令行工具。
 
@@ -56,15 +63,15 @@ kubernetes-dashboard   Active   12d
 
 运行这些脚本时，需要输入特定的参数。请点击链接访问具体的文档了解详情。
 
-## 关于部署后缀参数
+#### 关于部署后缀参数
 
 上述所有脚本都包含一个名为 `--suffix` 的参数，即 “部署后缀”。
 
 **部署后缀** 指的是，当所有工作坊参与者都位于同一个 Kubernetes 集群中工作时，用于标识你自己的一个后缀字符串。这个后缀字符串将出现在 Kubernetes 的 `namespace` 名称，以及各个微服务、CI/CD 软件的公开 URL 的域名中。
 
-在现场参与工作坊的人士，请根据讲师的指引输入此值；自行练习的人士，请自拟一个值。典型的值是：
+在现场参与工作坊的人士，请根据讲师的指引输入此值；不在现场的人士，请自拟一个值。典型的值可以是：
 * 讲师分配给你的序号，例如 `user12`
 * 你电脑的用户名，比如`$(id -un | awk '{print tolower($0)}')`
 * 你自拟的其他值，比如 `fancydotnet`
 
-后缀的值应该只包含小写字母，不能包含任何大写字符、特殊字符和中文。
+后缀的值应该只包含小写字母，不能包含任何大写字符、特殊字符和中文。请记住此值，在整个工作坊期间，都需要用到它。

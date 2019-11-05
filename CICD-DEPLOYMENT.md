@@ -7,7 +7,7 @@
 
 | 变量 |  描述  |  
 |----|----|
-| dns_suffix | 环境中 Ingress 使用的顶级域名 |
+| dns_suffix | 环境中 Ingress 使用的顶级域名。在现场参与的人士，请根据讲师的提示指定。不在现场参与的人士，请使用对应环境中的值。 |
 | k8s_version | Kubernetes 集群的版本号，支持 `1.13.11`, `1.14.7`, `1.15.4`, `1.16.0` |
 | ingress_apiversion | Ingress 的 apiVersion 值。如果 Kubernetes 集群版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
 | docker_registry_username | 将镜像推送到容器镜像注册表仓库时，所用的用户名  |

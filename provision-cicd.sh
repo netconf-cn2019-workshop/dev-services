@@ -68,8 +68,7 @@ done
 # CONFIGURATION                                                                #
 ################################################################################
 
-PRJ_SUFFIX="$ARG_PROJECT_SUFFIX"
-if [ -z "$PRJ_SUFFIX" ]; then
+if [ -z "$ARG_PROJECT_SUFFIX" ]; then
     echo "Please use '--suffix' parameter to sepecify a project suffix."
     exit 1
 fi
@@ -99,9 +98,9 @@ function deploy() {
   sleep 2
 
   echo 'Provisioning applications...'
-  kcd cicd-$PRJ_SUFFIX
+  kcd cicd-$ARG_PROJECT_SUFFIX
   
-  local _SED_EXPR="s/deploy_suffix=.*/deploy_suffix=$PRJ_SUFFIX/g"
+  local _SED_EXPR="s/deploy_suffix=.*/deploy_suffix=$ARG_PROJECT_SUFFIX/g"
   if [ "$(uname)" == "Darwin" ]; then
     sed -i '' $_SED_EXPR ./cicd-infra/vars
   else
@@ -129,6 +128,9 @@ function deploy() {
   
   kubectl logs pods/$(kubectl get pods -o=jsonpath='{.items[0].metadata.name}' -l job-name=cicd-installer)
   echo "Installation completed."
+
+  export DEPLOY_SUFFIX="$ARG_PROJECT_SUFFIX"
+  export DNS_SUFFIX=$(cat ./cicd-infra/vars | grep dns_suffix | cut -d '=' -f 2)
 }
 
 function kcd() {
@@ -154,10 +156,12 @@ echo_header ".NET Core Workshop on Kubernetes ($(date))"
 case "$ARG_COMMAND" in
     delete)
         echo "Delete demo..."
-        kubectl delete namespace dev-$PRJ_SUFFIX stage-$PRJ_SUFFIX prod-$PRJ_SUFFIX cicd-$PRJ_SUFFIX
+        kubectl delete namespace dev-$ARG_PROJECT_SUFFIX stage-$ARG_PROJECT_SUFFIX prod-$ARG_PROJECT_SUFFIX cicd-$ARG_PROJECT_SUFFIX
         echo
         echo "Delete completed successfully!"
         kcd default
+        export DEPLOY_SUFFIX=
+        export DNS_SUFFIX=
         ;;
       
     deploy)
@@ -165,7 +169,7 @@ case "$ARG_COMMAND" in
         deploy
         echo
         echo "Provisioning completed successfully!"
-        kcd cicd-$PRJ_SUFFIX
+        kcd cicd-$ARG_PROJECT_SUFFIX
         ;;
         
     *)
