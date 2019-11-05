@@ -93,3 +93,24 @@ kubectl proxy
 az aks browse -g <resource_group> -n <cluster_name>
 ```
 
+## 分配学员用户
+
+学员用户是参与工作坊的用户，他们每个人可以操作自己命令空间（namespace）中的对象，部署自己的工作坊环境，相互互不干扰。
+
+执行以下命令创建一个工作坊用户：
+
+```sh
+cd azure
+./create-user.sh <suffix>
+```
+
+此命令将新建 `users` 子目录，并在其中放置用于新用户设置他们的 kubectl 命令行工具的 config 文件。
+
+### 删除学员用户
+
+请执行以下命令，以删除一个学员用户。学员用户被删除之后，他所创建的各种资源也将一并被自动删除。该学员用户将失去访问 aks 集群的权限。
+
+```sh
+cd azure
+./delete-user.sh <suffix>
+```
