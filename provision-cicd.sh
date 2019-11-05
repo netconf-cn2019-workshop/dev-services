@@ -90,9 +90,6 @@ create_ns(){
 #   sonarqube: 1.25G 2.5G
 #   nexus: 0.5G 2Gi
 function deploy() {
-    export DEPLOY_SUFFIX="$ARG_PROJECT_SUFFIX"
-    export DNS_SUFFIX=$(cat ./cicd-infra/vars | grep dns_suffix | cut -d '=' -f 2)
-    
     create_ns dev-$ARG_PROJECT_SUFFIX
     create_ns stage-$ARG_PROJECT_SUFFIX
     create_ns prod-$ARG_PROJECT_SUFFIX
@@ -156,8 +153,6 @@ echo_header ".NET Core Workshop on Kubernetes ($(date))"
 case "$ARG_COMMAND" in
     delete)
         echo "Delete demo..."
-        export DEPLOY_SUFFIX=
-        export DNS_SUFFIX=
         kubectl delete namespace dev-$ARG_PROJECT_SUFFIX stage-$ARG_PROJECT_SUFFIX prod-$ARG_PROJECT_SUFFIX cicd-$ARG_PROJECT_SUFFIX
         echo
         echo "Delete completed successfully!"
