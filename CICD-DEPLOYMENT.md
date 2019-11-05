@@ -10,8 +10,11 @@
 | dns_suffix | 环境中 Ingress 使用的顶级域名 |
 | k8s_version | Kubernetes 集群的版本号，支持 `1.13.11`, `1.14.7`, `1.15.4`, `1.16.0` |
 | ingress_apiversion | Ingress 的 apiVersion 值。如果 Kubernetes 集群版本小于 `1.14.0`，请使用 `extensions/v1beta1`，否则请使用 `networking.k8s.io/v1beta1` |
+| docker_registry_username | 将镜像推送到容器镜像注册表仓库时，所用的用户名  |
+| docker_registry_password | 将镜像推送到容器镜像注册表仓库时，所用的密码   |
 | deploy_suffix | （无需手动修改，由命令行参数指定，此值会自动更新）本次部署后缀。关于此参数的更多说明，请参考 [文档首页](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/README.md)  |
 
+将镜像推送到容器镜像注册表仓库时，将使用 `services/vars` 中声明的 URL 作为推送的目标容器镜像注册表仓库服务器。
 
 ### 运行部署脚本
 

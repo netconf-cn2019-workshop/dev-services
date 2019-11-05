@@ -36,7 +36,7 @@ az aks get-credentials -g <resource_group> --name <cluster_name>
 
 ## 安装 Ingress Controller
 
-下面介绍使用 kubectl 1.14 以上的版本，或者 kustomize 的安装方法。关于使用 Helm 安装 Ingress 的方法，请参考 [Azure 官方文档](https://docs.microsoft.com/zh-cn/azure/aks/ingress-basic)。
+下面介绍直接使用 Yaml 配置文件的安装方法。关于使用 Helm 安装 Ingress 的方法，请参考 [Azure 官方文档](https://docs.microsoft.com/zh-cn/azure/aks/ingress-basic)。
 
 首先，下载用于安装 Ingress Controller 的部署文件：
 
