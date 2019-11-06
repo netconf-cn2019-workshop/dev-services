@@ -1,12 +1,17 @@
-# 与会者环境准备
+# 工作坊与会者文档
 
-## 介绍
+欢迎来到 .NET Core on Kubernetes 工作坊。本次工作坊将在 2019.11.10 在上海举行，同时提供线上直播。
+
+2019.11.10 在上海 .NET Conf 大会第二天，由张善友、陈计节、刘腾飞三位合台为您呈现 NET Core 基于K8S的微服务和 CI/CD 动手工作坊，课程中会有三位助教（陈作、张潇、章展宏）协助各项准备和现场工作。
+
+## 工作坊简介
 
 本次工作坊会涉及到 .NET Core 容器开发、.NET Core 微服务开发、Kubernetes、以及 CI/CD 相关的内容。我们会用一个小型电商的项目做为 Demo，这个 Demo 的代码我们已经传到 [GitHub](https://github.com/netconf-cn2019-workshop/) 了。请大家务必在到场之前在自己的笔记本上安装好必要的工具以及 SDK。
 
-现场工作坊地址： 上海市徐汇区田林路192号 J 座微软 Reactor （请大家不要迟到，我们会在9点准时开始；与前一天的会议不在同一个位置）
+现场工作坊地址： 上海市徐汇区田林路192号 J 座微软 Reactor （请大家不要迟到，我们会在 9 点准时开始；地点与前一天的会议不在同一个位置）
 
 **请特别注意**
+
 [由世纪互联运营的 Azure 中国](https://www.azure.cn/home/features/kubernetes-service)为现场的每一位同学提供了一个线上的 Kubernetes 集群环境，现场的同学只需要在自己的笔记本上有kubectl这个客户端即可，不需要自己建集群。
 
 参与直播的同学如果想跟着直播一起做动手实践，需要自己有一套 Kubernetes 集群环境。可以用 Minikube，或者自己选用其他云服务。详情请参考[工作坊前的准备工作](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/attendees/GETTING-READY.md#%E5%B7%A5%E4%BD%9C%E5%9D%8A%E5%89%8D%E7%9A%84%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C)
