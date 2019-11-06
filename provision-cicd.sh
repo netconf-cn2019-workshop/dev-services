@@ -110,8 +110,8 @@ function deploy() {
   ./tmpl.sh ./cicd-infra/jenkins.yaml ./cicd-infra/vars | kubectl apply -f -
   sleep 3
 
-  ./tmpl.sh ./cicd-infra/sonarqube.yaml ./cicd-infra/vars | kubectl apply -f -
-  sleep 3
+#   ./tmpl.sh ./cicd-infra/sonarqube.yaml ./cicd-infra/vars | kubectl apply -f -
+#   sleep 3
 
   ./tmpl.sh ./cicd-infra/nexus.yaml ./cicd-infra/vars | kubectl apply -f -
   sleep 3
