@@ -1,6 +1,48 @@
 # 与会者环境准备
 
-## 软硬件环境依赖
+## 介绍
+
+本次工作坊会涉及到 .NET Core 容器开发、.NET Core 微服务开发、Kubernetes、以及 CI/CD 相关的内容。我们会用一个小型电商的项目做为 Demo，这个 Demo 的代码我们已经传到 [GitHub](https://github.com/netconf-cn2019-workshop/) 了。请大家务必在到场之前在自己的笔记本上安装好必要的工具以及 SDK。
+
+现场工作坊地址： 上海市徐汇区田林路192号 J 座微软 Reactor （请大家不要迟到，我们会在9点准时开始；与前一天的会议不在同一个位置）
+
+**请特别注意**
+[由世纪互联运营的 Azure 中国](https://www.azure.cn/home/features/kubernetes-service)为现场的每一位同学提供了一个线上的 Kubernetes 集群环境，现场的同学只需要在自己的笔记本上有kubectl这个客户端即可，不需要自己建集群。
+
+参与直播的同学如果想跟着直播一起做动手实践，需要自己有一套 Kubernetes 集群环境。可以用 Minikube，或者自己选用其他云服务。详情请参考[工作坊前的准备工作](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/attendees/GETTING-READY.md#%E5%B7%A5%E4%BD%9C%E5%9D%8A%E5%89%8D%E7%9A%84%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C)
+
+## 整体流程
+
+**上午 9:00 ~ 12:00**
+
+* 概要介绍 （主要介绍我们这6个小时做什么）
+* 项目 Demo（动手项目整体demo)
+* .NET Core 容器化开发
+  * 完成一个.NET Core 项目的镜像构建及Docker部署 
+* Kubernetes 基础原理及实践
+  * 连接到 Azure Kubernetes 集群
+  * 基础原理
+  * 部署.NET Core服务镜像到 Kubernetes 并预览
+* CI/CD 基础以及实践 
+  * 基础介绍
+  * 环境搭建 
+  * 动手操作完成项目的 CI/CD
+
+**下午 13:30~16:30**
+
+* 微服务开发体系原理和概念介绍   60分钟 
+  * 基础概念 
+  * 网关
+  * 统一认证及授权 
+  * 服务通信 
+  * 统一配置 on Kubernetes
+* 微服务开发实践  90 分钟 
+  * 在现有微服务示例项目上增加功能 
+  * 部署微服务项目到 Kubernetes
+  * 通过 CI/CD 部署所有微服务  
+* 总结
+
+## 本地电脑软硬件环境依赖
 
 * 可用内存：8GB 或更多
 * 操作系统：Windows/macOS
@@ -29,6 +71,24 @@ git --version
 docker --version
 kubectl version --client
 ```
+
+## 提前熟悉代码
+
+工作坊并不要求参与者提前熟悉代码，如果你希望提前熟悉一下，可以使用以下脚本：
+
+用 PowerShell 克隆所有项目：
+
+```ps1
+"docker-workshop","dev-services", "ECommerce.Catalog.Api","ECommerce.Payment.Host","ECommerce.Shipping.Host","ECommerce.Common","ECommerce.Reporting.Api","ECommerce.WebApp","ECommerce.Customers.Api","ECommerce.Sales.Api","ECommerce.Services.Common"  | ForEach-Object { powershell git clone  "https://github.com/netconf-cn2019-workshop/$_.git" }
+```
+
+用 Shell Script 克隆所有项目：
+
+```sh
+for p in "docker-workshop" "dev-services" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do git clone https://github.com/netconf-cn2019-workshop/$p.git; done
+```
+
+在现场，讲师还会引导再次下载所有的代码。
 
 ## 工作坊前的准备工作
 
