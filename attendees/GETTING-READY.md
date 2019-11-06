@@ -103,7 +103,7 @@ for p in "docker-workshop" "dev-services" "ECommerce.Catalog.Api" "ECommerce.Pay
 
 在现场参与工作坊的人士，请忽此节。此部分基础设施，将由工作坊组织方提供。对于不在现场的参与者，要么使用 [Azure Kubernetes Service 服务](https://www.azure.cn/home/features/kubernetes-service) (aks) 或其他云服务创建你自己的集群，要么请使用 [Minikube](https://minikube.sigs.k8s.io/) 创建一个自有集群。创建集群时，请确保集群的工作节点上至少有 8GB 的可用内存。
 
-如果你使用 aks 集群，请[参考此处](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/azure/README.md)的文档完成对集群的必要初始化工具。如果使用自建的集群，请根据其对应的文档添加 Ingress Controller 等扩展功能。
+如果你使用 aks 集群，请[参考此处](https://github.com/netconf-cn2019-workshop/dev-services/blob/master/azure/INSTALLATION.md)的文档完成对集群的必要初始化工具。如果使用自建的集群，请根据其对应的文档添加 Ingress Controller 等扩展功能。
 
 集群创建完成之后，请设置好你的本地工作环境的 kubectl，使用以下命令确保其能够成功连接到创建完成的集群：
 
