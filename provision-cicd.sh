@@ -24,7 +24,7 @@ function usage() {
 }
 
 ARG_PROJECT_SUFFIX=
-ARG_COMMAND=
+ARG_COMMAND=deploy
 
 while :; do
     case $1 in
