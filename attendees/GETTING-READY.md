@@ -78,7 +78,8 @@ kubectl version --client
 ```
 
 可以提前把相关基础镜像拉取到本地
-```docker pull mcr.microsoft.com/dotnet/core/sdk:2.2
+```sh
+docker pull mcr.microsoft.com/dotnet/core/sdk:2.2
 docker pull mcr.microsoft.com/dotnet/core/aspnet:2.2
 ```
 
