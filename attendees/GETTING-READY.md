@@ -77,6 +77,11 @@ docker --version
 kubectl version --client
 ```
 
+可以提前把相关基础镜像拉取到本地
+```docker pull mcr.microsoft.com/dotnet/core/sdk:2.2
+docker pull mcr.microsoft.com/dotnet/core/aspnet:2.2
+```
+
 ## 提前熟悉代码
 
 工作坊并不要求参与者提前熟悉代码，如果你希望提前熟悉一下，可以使用以下脚本：
