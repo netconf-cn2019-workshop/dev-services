@@ -114,7 +114,7 @@ data:
       }
 
       # migrate_repo
-      for p in "dev-services" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do 
+      for p in "dev-services" "ECommerce.Gateway" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do 
         migrate_repo https://github.com/netconf-cn2019-workshop/$p.git 
         sleep 2
         if [ "$p" != "ECommerce.WebApp" ] && [ "$p" != "ECommerce.Services.Common" ] && [ "$p" != "ECommerce.Common" ]; then

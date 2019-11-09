@@ -470,7 +470,7 @@ data:
     EOF
     }
 
-    PROJECTS=("ECommerce.Catalog.Api" "ECommerce.Customers.Api" "ECommerce.Payment.Host" "ECommerce.Reporting.Api" "ECommerce.Sales.Api" "ECommerce.Shipping.Host" "ECommerce.WebApp");
+    PROJECTS=("ECommerce.Gateway" "ECommerce.Catalog.Api" "ECommerce.Customers.Api" "ECommerce.Payment.Host" "ECommerce.Reporting.Api" "ECommerce.Sales.Api" "ECommerce.Shipping.Host" "ECommerce.WebApp");
 
     for PROJ in ${PROJECTS[@]} ; do
         mkdir -p /var/jenkins_home/jobs/$PROJ

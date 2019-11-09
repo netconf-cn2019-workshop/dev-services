@@ -90,13 +90,13 @@ docker pull mcr.microsoft.com/dotnet/core/aspnet:2.2
 用 PowerShell 克隆所有项目：
 
 ```ps1
-"docker-workshop","dev-services", "ECommerce.Catalog.Api","ECommerce.Payment.Host","ECommerce.Shipping.Host","ECommerce.Common","ECommerce.Reporting.Api","ECommerce.WebApp","ECommerce.Customers.Api","ECommerce.Sales.Api","ECommerce.Services.Common"  | ForEach-Object { powershell git clone  "https://github.com/netconf-cn2019-workshop/$_.git" }
+"docker-workshop","dev-services", "ECommerce.Gateway", "ECommerce.Catalog.Api","ECommerce.Payment.Host","ECommerce.Shipping.Host","ECommerce.Common","ECommerce.Reporting.Api","ECommerce.WebApp","ECommerce.Customers.Api","ECommerce.Sales.Api","ECommerce.Services.Common"  | ForEach-Object { powershell git clone  "https://github.com/netconf-cn2019-workshop/$_.git" }
 ```
 
 用 Shell Script 克隆所有项目：
 
 ```sh
-for p in "docker-workshop" "dev-services" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do git clone https://github.com/netconf-cn2019-workshop/$p.git; done
+for p in "docker-workshop" "dev-services" "ECommerce.Gateway" "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do git clone https://github.com/netconf-cn2019-workshop/$p.git; done
 ```
 
 在现场，讲师还会引导再次下载所有的代码。
@@ -162,7 +162,7 @@ CI/CD 环境部署完成之后，请回到工作目录根目录，使用如下�
 
 ```sh
 # cd <workspace>
-for p in "ECommerce.Catalog.Api" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do git clone http://gogs-$(cat ./cicd-infra/vars | grep deploy_suffix | cut -d '=' -f 2).$(cat ./cicd-infra/vars | grep dns_suffix | cut -d '=' -f 2)/gogs/$p.git; done
+for p in "ECommerce.Catalog.Api" "ECommerce.Gateway" "ECommerce.Payment.Host" "ECommerce.Shipping.Host" "ECommerce.Common" "ECommerce.Reporting.Api" "ECommerce.WebApp" "ECommerce.Customers.Api" "ECommerce.Sales.Api" "ECommerce.Services.Common" ;  do git clone http://gogs-$(cat ./cicd-infra/vars | grep deploy_suffix | cut -d '=' -f 2).$(cat ./cicd-infra/vars | grep dns_suffix | cut -d '=' -f 2)/gogs/$p.git; done
 ```
 
   
