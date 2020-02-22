@@ -107,7 +107,7 @@ spec:
     protocol: TCP
     targetPort: 10022
   selector:
-    app: gogs
+    app: gogs 
     deploymentconfig: gogs
   sessionAffinity: None
   type: ClusterIP
@@ -121,6 +121,7 @@ metadata:
     app: gogs
   annotations:
     ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
   generation: 1
 spec:
   rules:

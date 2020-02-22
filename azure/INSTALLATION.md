@@ -38,27 +38,12 @@ az aks get-credentials -g <resource_group> --name <cluster_name>
 
 下面介绍直接使用 Yaml 配置文件的安装方法。关于使用 Helm 安装 Ingress 的方法，请参考 [Azure 官方文档](https://docs.microsoft.com/zh-cn/azure/aks/ingress-basic)。
 
-首先，下载用于安装 Ingress Controller 的部署文件：
-
-```
-mkdir -p ingress
-curl -s -o "ingress/#1.yaml" "https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/{configmap,mandatory,namespace,rbac,with-rbac}.yaml"
-curl -s -o "ingress/service.yaml" "https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml"
-```
-
-手动编辑 `ingress/mandatory.yaml` ，并删除其中的如下两行：
-
-```
-    nodeSelector:
-      kubernetes.io/os: linux
-```
-
-然后执行安装：
+执行安装：
 
 ```
 kubectl create namespace ingress-nginx
 kubectl config set-context $(kubectl config current-context) --namespace "ingress-nginx"
-kubectl apply -f ./ingress
+kubectl apply -f ./nginx-ingress-controller
 ```
 
 安装完毕后，使用以下命令获取 Ingress 的公网 IP：

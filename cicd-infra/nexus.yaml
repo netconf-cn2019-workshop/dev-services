@@ -96,6 +96,7 @@ metadata:
     app: nexus
   annotations:
     ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
   generation: 1
 spec:
   rules:
