@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: dotnet-task
+spec:
+  inputs:
+    params:
+      - name: runner
+        type: string
+  steps:
+    - name: hello-dotnet
+      image: dotnetclub-docker.pkg.coding.net/dotnetconf/mcr/dotnet-core-sdk:2.2
+      script: |
+        dotnet --version
+        echo "Hello, the dotnet task is running by the runner $(inputs.params.runner)"
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: dotnet-pipeline
+spec:
+  params:
+    - name: taskRunner
+      type: string
+      default: 'Tekton pipeline'
+  tasks:
+    - name: dotnet-helloworld
+      taskRef:
+        name: dotnet-task
+        kind: Task
+      params:
+        - name: runner
+          value: "$(params.taskRunner)"
