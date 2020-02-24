@@ -1,0 +1,70 @@
+
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: catalog-project-code
+spec:
+  type: git
+  params:
+    - name: url
+      value: http://gogs.cicd-lab.svc.cluster.local:3000/gogs/ECommerce.Catalog.Api.git
+    - name: revision
+      value: master
+
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: catalog-image-tag
+spec:
+  type: image
+  params:
+    - name: url
+      value: 'dotnetclub-docker.pkg.coding.net/dotnetconf/dev/catalog-api'
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: catalog-pipeline
+spec:
+  params:
+    - name: buildVersion
+      type: string
+      description: version and tag for the build
+  resources:
+    - name: project-code
+      type: git
+    - name: image-full-tag
+      type: image
+  tasks:
+    - name: package
+      taskRef:
+        name: dotnet-package
+        kind: ClusterTask
+      resources:
+          inputs:
+            - name: workspace
+              resource: project-code
+      params:
+        - name: version
+          value: "$(params.buildVersion)"
+    - name: build-and-push-image
+      taskRef:
+        name: image-build-push
+        kind: ClusterTask
+      resources:
+          inputs:
+            - name: workspace
+              resource: project-code
+          outputs:
+            - name: builtImage
+              resource: image-full-tag
+      params:
+        - name: imageTag
+          value: "$(params.buildVersion)"
+      runAfter:
+        - package
+    

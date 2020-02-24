@@ -1,0 +1,131 @@
+apiVersion: tekton.dev/v1alpha1
+kind: ClusterTask
+metadata:
+  name: image-build-push
+spec:
+  inputs:
+    resources:
+      - name: workspace
+        type: git
+        targetPath: project-code
+    params:
+      - name: dockerfileName
+        type: string
+        description: The name of the Dockerfile
+        default: Dockerfile
+      - name: imageTag
+        type: string
+        description: The tag of the image
+        default: latest
+  outputs:
+    resources:
+      - name: builtImage
+        type: image
+  steps:
+    - name: docker-build
+      image: gcr.azk8s.cn/cloud-builders/docker:18.09.6
+      workingDir: "/workspace/project-code"
+      args:
+        [
+          "build",
+          "--tag",
+          "$(outputs.resources.builtImage.url):$(inputs.params.imageTag)",
+          "--file",
+          "$(inputs.params.dockerfileName)",
+          ".",
+        ]
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+      securityContext:
+        privileged: true
+    - name: docker-push
+      image: gcr.azk8s.cn/cloud-builders/docker:18.09.6
+      args: ["push", "$(outputs.resources.builtImage.url):$(inputs.params.imageTag)"]
+      volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+      securityContext:
+        privileged: true
+  volumes:
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
+
+---
+
+apiVersion: tekton.dev/v1alpha1
+kind: ClusterTask
+metadata:
+  name: dotnet-package
+spec:
+  inputs:
+    resources:
+      - name: workspace
+        type: git
+        targetPath: project-code
+    params:
+      - name: projectFile
+        type: string
+        description: The name of the dotnet project or solution
+        default: '.'
+      - name: version
+        type: string
+        description: The version of the task run
+  stepTemplate:
+      env:
+        - name: DOTNET_CLI_TELEMETRY_OPTOUT
+          value: 'true'
+  steps:
+    - name: dotnet-build
+      image: dotnetclub-docker.pkg.coding.net/dotnetconf/mcr/dotnet-core-sdk:2.2
+      workingDir: "/workspace/project-code"
+      command: ["dotnet"]
+      args: ["build", "$(inputs.params.projectFile)"]
+      volumeMounts:
+        - name: nuget-volume
+          mountPath: /root/.nuget
+    - name: dotnet-publish
+      image: dotnetclub-docker.pkg.coding.net/dotnetconf/mcr/dotnet-core-sdk:2.2
+      workingDir: "/workspace/project-code"
+      command: ["dotnet"]
+      args: ["publish", "$(inputs.params.projectFile)", "-c", "Release", "-o", "/dist"]
+      volumeMounts:
+        - name: dist-volume
+          mountPath: /dist
+        - name: nuget-volume
+          mountPath: /root/.nuget
+    - name: tar-it-up
+      image: dotnetclub-docker.pkg.coding.net/dotnetconf/mcr/dotnet-core-sdk:2.2
+      command: ["/bin/bash"]
+      args: ['-c', 'cd /dist && touch $(inputs.params.version).tar.gz && tar --exclude=$(inputs.params.version).tar.gz -czvf ./$(inputs.params.version).tar.gz .']
+      volumeMounts:
+        - name: dist-volume
+          mountPath: /dist
+  volumes:
+    - name: dist-volume
+      emptyDir: {}
+    - name: nuget-volume
+      emptyDir: {}
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: image-registry-credential
+  annotations:
+    tekton.dev/docker-0: dotnetclub-docker.pkg.coding.net
+type: kubernetes.io/basic-auth
+stringData:
+  username: dev-1582509370245
+  password: 17263d14ac8a6287c3b468fe6231def2a9f11257
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: docker-push-bot
+secrets:
+  - name: image-registry-credential
+  
