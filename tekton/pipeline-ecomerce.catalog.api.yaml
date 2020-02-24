@@ -16,7 +16,7 @@ spec:
 apiVersion: tekton.dev/v1alpha1
 kind: PipelineResource
 metadata:
-  name: catalog-image-tag
+  name: catalog-image-repository
 spec:
   type: image
   params:
